@@ -1,0 +1,24 @@
+# Build artifacts
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/Makefile
+/*.o
+/*.obj
+/*.exe
+/*.out
+/*.a
+/*.so
+/*.dll
+
+# Executables
+/SierpinskiTriangle
+
+# IDE/editor files
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Logs
+*.log
