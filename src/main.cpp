@@ -12,6 +12,8 @@
 #include <cmath>
 #include <vector>
 
+#include <nanogui/nanogui.h>
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -231,7 +233,20 @@ void processInput(GLFWwindow *window);
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 
 int main()
-{
+{   
+    /*nanogui::init();
+    nanogui::Screen *screen = nullptr;
+    try {
+        screen = new nanogui::Screen(Eigen::Vector2i(500, 700), "NanoGUI Test");
+        screen->setVisible(true);
+        screen->performLayout();
+        nanogui::mainloop();
+    } catch (const std::runtime_error &e) {
+        std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
+        std::cerr << error_msg << std::endl;
+        return -1;
+    }
+        */
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -263,7 +278,7 @@ int main()
         return -1;
     }
 
-    Shader ourShader("src/shader.vs", "src/shader.fs");
+    Shader ourShader("../src/shader.vs", "../src/shader.fs");
 
     // Tetrahedron vertices
 
@@ -353,6 +368,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
+    //nanogui::shutdown();
     glfwTerminate();
     return 0;
 }

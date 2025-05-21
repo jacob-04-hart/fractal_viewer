@@ -11,8 +11,8 @@
 /*.so
 /*.dll
 
-# Executables
-/SierpinskiTriangle
+# Ignore all build directories
+build*/
 
 # IDE/editor files
 .vscode/
