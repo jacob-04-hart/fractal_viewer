@@ -10,6 +10,7 @@
 /*.a
 /*.so
 /*.dll
+/*.sh
 
 # Ignore all build directories
 build*/
