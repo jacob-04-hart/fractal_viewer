@@ -47,7 +47,7 @@ const std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
 const std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
 const std::vector<float> color4 = {1.0f, 1.0f, 0.0f}; // yellow
 
-const unsigned int maxDepth = 3; // change this to either save or set fire to your computer
+unsigned int maxDepth = 3; // change this to either save or set fire to your computer
 
 // Face 1
 const std::vector<float> f1vertex1 = {.5f, .5f, .5f};
@@ -234,19 +234,6 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 
 int main()
 {   
-    /*nanogui::init();
-    nanogui::Screen *screen = nullptr;
-    try {
-        screen = new nanogui::Screen(Eigen::Vector2i(500, 700), "NanoGUI Test");
-        screen->setVisible(true);
-        screen->performLayout();
-        nanogui::mainloop();
-    } catch (const std::runtime_error &e) {
-        std::string error_msg = std::string("Caught a fatal error: ") + std::string(e.what());
-        std::cerr << error_msg << std::endl;
-        return -1;
-    }
-        */
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -256,7 +243,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "fractal_viewer", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -277,6 +264,9 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    nanogui::Screen screen;
+    screen.initialize(window, false);
 
     Shader ourShader("../src/shader.vs", "../src/shader.fs");
 
@@ -320,22 +310,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ourShader.use();
-        /*
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-        unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-        unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
-
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-
-        ourShader.setMat4("projection", projection);
-        */
 
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -368,7 +342,6 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
-    //nanogui::shutdown();
     glfwTerminate();
     return 0;
 }
