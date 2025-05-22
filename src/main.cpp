@@ -424,7 +424,7 @@ int main()
     combo->setCallback([&type](int idx){type = idx;});
 
     nanogui::FormHelper *gui = new nanogui::FormHelper(&screen);
-    nanogui::ref<nanogui::Window> popup = gui->addWindow(Eigen::Vector2i(10, 150), "Set maxDepth");
+    nanogui::ref<nanogui::Window> popup = gui->addWindow(Eigen::Vector2i(10, 110), "Set Parameters");
 
     int guiMaxDepth = maxDepth;
     nanogui::IntBox<int> *depthBox = gui->addVariable("maxDepth", guiMaxDepth);
@@ -432,7 +432,7 @@ int main()
     depthBox->setMinValue(0);
     depthBox->setMaxValue(10);
 
-    gui->addButton("Enter", [&, depthBox]() {
+    gui->addButton("Generate", [&, depthBox]() {
         maxDepth = depthBox->value();
         vertices.clear();
         if (type==0){
@@ -525,7 +525,8 @@ int main()
                 }
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
-                rotatedModel = glm::rotate(rotatedModel, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                 ourShader.setMat4("model", rotatedModel);
 
                 glBindVertexArray(VAO);
