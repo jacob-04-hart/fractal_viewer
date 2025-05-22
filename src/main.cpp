@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include "shader_s.h"
 #include "camera.h"
@@ -44,10 +45,10 @@ float totalRotX, totalRotY;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-const std::vector<float> color1 = {1.0f, 0.0f, 0.0f}; // red
-const std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
-const std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
-const std::vector<float> color4 = {1.0f, 1.0f, 0.0f}; // yellow
+std::vector<float> color1 = {1.0f, 0.0f, 0.0f}; // red
+std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
+std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
+std::vector<float> color4 = {1.0f, 1.0f, 0.0f}; // yellow
 
 unsigned int maxDepth = 3; // change this to either save or set fire to your computer
 
@@ -132,6 +133,18 @@ bool normalsEqual(const std::vector<float> &n1, const std::vector<float> &n2, fl
 {
     float dot = n1[0] * n2[0] + n1[1] * n2[1] + n1[2] * n2[2];
     return std::abs(std::abs(dot) - 1.0f) < epsilon;
+}
+
+std::vector<float> rotateAroundAxis(
+    const std::vector<float>& point,
+    const std::vector<float>& center,
+    const std::vector<float>& axis,
+    float angle)
+{
+    glm::vec3 p(point[0] - center[0], point[1] - center[1], point[2] - center[2]);
+    glm::vec3 ax(axis[0], axis[1], axis[2]);
+    glm::vec3 rotated = glm::rotate(p, angle, glm::normalize(ax));
+    return {rotated.x + center[0], rotated.y + center[1], rotated.z + center[2]};
 }
 
 const std::vector<float> normal1 = normal(f1vertex1, f1vertex2, f1vertex3);
@@ -351,6 +364,86 @@ void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
     }
 };
 
+void drawST(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
+            std::vector<float> &vertices)
+{
+    if (depth < maxDepth)
+    {
+        std::vector<float> mid1 = midpoint(a, b);
+        std::vector<float> mid2 = midpoint(b, c);
+        std::vector<float> mid3 = midpoint(c, a);
+
+        drawST(a, mid1, mid3, depth + 1, vertices);
+        drawST(mid1, b, mid2, depth + 1, vertices);
+        drawST(mid3, mid2, c, depth + 1, vertices);
+
+        std::vector<float> center = {
+            (mid1[0] + mid2[0] + mid3[0]) / 3.0f,
+            (mid1[1] + mid2[1] + mid3[1]) / 3.0f,
+            (mid1[2] + mid2[2] + mid3[2]) / 3.0f};
+        std::vector<float> n = normal(mid1, mid2, mid3);
+
+        float edgeLength = std::sqrt(
+            (mid1[0] - mid2[0]) * (mid1[0] - mid2[0]) +
+            (mid1[1] - mid2[1]) * (mid1[1] - mid2[1]) +
+            (mid1[2] - mid2[2]) * (mid1[2] - mid2[2]));
+        float height = std::sqrt(2.0f / 3.0f) * edgeLength;
+
+        std::vector<float> inner1 = {mid1[0] - n[0] * height, mid1[1] - n[1] * height, mid1[2] - n[2] * height};
+        std::vector<float> inner2 = {mid2[0] - n[0] * height, mid2[1] - n[1] * height, mid2[2] - n[2] * height};
+        std::vector<float> inner3 = {mid3[0] - n[0] * height, mid3[1] - n[1] * height, mid3[2] - n[2] * height};
+
+        float angle = glm::radians(60.0f);
+        std::vector<float> rotated1 = rotateAroundAxis(inner1, center, n, angle);
+        std::vector<float> rotated2 = rotateAroundAxis(inner2, center, n, angle);
+        std::vector<float> rotated3 = rotateAroundAxis(inner3, center, n, angle);
+
+        drawST(rotated1, rotated2, rotated3, depth + 1, vertices);
+    }
+    else
+    {
+        drawTriangle(a, b, c, vertices);
+    }
+}
+
+void drawInverseST(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
+            std::vector<float> &vertices)
+{
+    std::vector<float> mid1 = midpoint(a, b);
+    std::vector<float> mid2 = midpoint(b, c);
+    std::vector<float> mid3 = midpoint(c, a);
+    std::vector<float> center = {
+        (mid1[0] + mid2[0] + mid3[0]) / 3.0f,
+        (mid1[1] + mid2[1] + mid3[1]) / 3.0f,
+        (mid1[2] + mid2[2] + mid3[2]) / 3.0f};
+    std::vector<float> n = normal(mid1, mid2, mid3);
+
+    float edgeLength = std::sqrt(
+        (mid1[0] - mid2[0]) * (mid1[0] - mid2[0]) +
+        (mid1[1] - mid2[1]) * (mid1[1] - mid2[1]) +
+        (mid1[2] - mid2[2]) * (mid1[2] - mid2[2]));
+    float height = std::sqrt(2.0f / 3.0f) * edgeLength;
+
+    std::vector<float> inner1 = {mid1[0] - n[0] * height, mid1[1] - n[1] * height, mid1[2] - n[2] * height};
+    std::vector<float> inner2 = {mid2[0] - n[0] * height, mid2[1] - n[1] * height, mid2[2] - n[2] * height};
+    std::vector<float> inner3 = {mid3[0] - n[0] * height, mid3[1] - n[1] * height, mid3[2] - n[2] * height};
+
+    float angle = glm::radians(60.0f);
+    std::vector<float> rotated1 = rotateAroundAxis(inner1, center, n, angle);
+    std::vector<float> rotated2 = rotateAroundAxis(inner2, center, n, angle);
+    std::vector<float> rotated3 = rotateAroundAxis(inner3, center, n, angle);
+
+    drawTriangle(mid1, mid2, mid3, vertices);
+    drawTriangle(rotated1, rotated2, rotated3, vertices);
+    if (depth < maxDepth)
+    {
+        drawInverseST(a, mid1, mid3, depth + 1, vertices);
+        drawInverseST(mid1, b, mid2, depth + 1, vertices);
+        drawInverseST(mid3, mid2, c, depth + 1, vertices);
+        drawInverseST(rotated1, rotated2, rotated3, depth + 1, vertices);
+    }
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -414,26 +507,72 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch"};
+    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
     comboWindow->setPosition(Eigen::Vector2i(10, 10));
     comboWindow->setLayout(new nanogui::GroupLayout());
     auto *combo = new nanogui::ComboBox(comboWindow, typeOptions);
     combo->setSelectedIndex(type);
-    combo->setCallback([&type](int idx){type = idx;});
+    combo->setCallback([&type](int idx)
+                       { type = idx; });
 
-    nanogui::FormHelper *gui = new nanogui::FormHelper(&screen);
-    nanogui::ref<nanogui::Window> popup = gui->addWindow(Eigen::Vector2i(10, 110), "Set Parameters");
+    nanogui::ref<nanogui::Window> colorsWindow = new nanogui::Window(&screen, "Colors");
+    colorsWindow->setPosition(Eigen::Vector2i(10, 110));
+    colorsWindow->setLayout(new nanogui::GroupLayout());
+    colorsWindow->setSize(Eigen::Vector2i(250, 400));
+    nanogui::TabWidget *colors = new nanogui::TabWidget(colorsWindow);
+    
+    nanogui::Widget* layer1 = colors->createTab("1");
+    layer1->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer1, "Color 1");
+    nanogui::ColorWheel *colorWheel1 = new nanogui::ColorWheel(layer1);
+    colorWheel1->setColor(nanogui::Color(color1[0], color1[1], color1[2], 1.0f));
 
+    nanogui::Widget* layer2 = colors->createTab("2");
+    layer2->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer2, "Color 2");
+    nanogui::ColorWheel *colorWheel2 = new nanogui::ColorWheel(layer2);
+    colorWheel2->setColor(nanogui::Color(color2[0], color2[1], color2[2], 1.0f));
+
+    nanogui::Widget* layer3 = colors->createTab("3");
+    layer3->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer3, "Color 3");
+    nanogui::ColorWheel *colorWheel3 = new nanogui::ColorWheel(layer3);
+    colorWheel3->setColor(nanogui::Color(color3[0], color3[1], color3[2], 1.0f));
+
+    nanogui::Widget* layer4 = colors->createTab("4");
+    layer4->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer4, "Color 4");
+    nanogui::ColorWheel *colorWheel4 = new nanogui::ColorWheel(layer4);
+    colorWheel4->setColor(nanogui::Color(color4[0], color4[1], color4[2], 1.0f));
+
+    nanogui::ref<nanogui::Window> paramsWindow = new nanogui::Window(&screen, "Parameters");
+    paramsWindow->setPosition(Eigen::Vector2i(10, 360));
+    paramsWindow->setLayout(new nanogui::GroupLayout());
+    paramsWindow->setSize(Eigen::Vector2i(250, 250));
+    nanogui::Widget *params = new nanogui::Widget(paramsWindow);
+    params->setLayout(new nanogui::GroupLayout());
+
+    params->add<nanogui::Label>("Recursive Depth", "sans-bold");
     int guiMaxDepth = maxDepth;
-    nanogui::IntBox<int> *depthBox = gui->addVariable("maxDepth", guiMaxDepth);
+    nanogui::IntBox<int> *depthBox = new nanogui::IntBox<int>(params);
+    depthBox->setValue(guiMaxDepth);
     depthBox->setEditable(true);
     depthBox->setMinValue(0);
     depthBox->setMaxValue(10);
 
-    gui->addButton("Generate", [&, depthBox]() {
+    nanogui::Button *generateButton = new nanogui::Button(params, "Generate");
+    generateButton->setCallback([&, depthBox]() {
         maxDepth = depthBox->value();
+        nanogui::Color c1 = colorWheel1->color();
+        color1 = {c1.r(), c1.g(), c1.b()};
+        nanogui::Color c2 = colorWheel2->color();
+        color2 = {c2.r(), c2.g(), c2.b()};
+        nanogui::Color c3 = colorWheel3->color();
+        color3 = {c3.r(), c3.g(), c3.b()};
+        nanogui::Color c4 = colorWheel4->color();
+        color4 = {c4.r(), c4.g(), c4.b()};
         vertices.clear();
         if (type==0){
             drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
@@ -450,8 +589,17 @@ int main()
             drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT3(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+        }else if (type==3){
+            drawST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
+            drawST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
+            drawST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
+            drawST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+        }else if (type==4){
+            drawInverseST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
+            drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
+            drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
+            drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
         };
-        
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
