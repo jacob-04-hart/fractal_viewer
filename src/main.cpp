@@ -290,6 +290,67 @@ void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
     }
 };
 
+void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
+            std::vector<float> &vertices)
+{
+    if (depth < maxDepth)
+    {
+        std::vector<float> mid1 = midpoint(c, a);
+        std::vector<float> mid2 = midpoint(a, b);
+        std::vector<float> mid3 = midpoint(b, c);
+
+        std::vector<float> newA1 = mid1;
+        std::vector<float> newB1 = mid2;
+
+        std::vector<float> newA2 = mid2;
+        std::vector<float> newB2 = mid3;
+
+        std::vector<float> newA3 = mid3;
+        std::vector<float> newB3 = mid1;
+
+        std::vector<float> origNormal = normal(a, b, c);
+        std::vector<float> baseNormal = normal(mid1, mid2, mid3);
+
+        float edgeLength = std::sqrt(
+            (mid1[0] - mid2[0]) * (mid1[0] - mid2[0]) +
+            (mid1[1] - mid2[1]) * (mid1[1] - mid2[1]) +
+            (mid1[2] - mid2[2]) * (mid1[2] - mid2[2]));
+        float height = std::sqrt(2.0f / 3.0f) * edgeLength;
+
+        std::vector<float> centroid = {
+            (mid1[0] + mid2[0] + mid3[0]) / 3.0f,
+            (mid1[1] + mid2[1] + mid3[1]) / 3.0f,
+            (mid1[2] + mid2[2] + mid3[2]) / 3.0f};
+
+        std::vector<float> newC1 = {
+            centroid[0] + baseNormal[0] * height,
+            centroid[1] + baseNormal[1] * height,
+            centroid[2] + baseNormal[2] * height};
+
+        drawKT3(mid1, mid2, newC1, 20, vertices);
+        drawKT3(mid2, mid3, newC1, 20, vertices);
+        drawKT3(mid3, mid1, newC1, 20, vertices);
+
+        if (depth < (maxDepth - 1))
+        {
+            drawKT3(mid2, mid1, a, depth + 1, vertices);
+            drawKT3(mid3, mid2, b, depth + 1, vertices);
+            drawKT3(mid1, mid3, c, depth + 1, vertices);
+        }
+        else
+        {
+            drawTriangle(mid1, mid2, a, vertices);
+            drawTriangle(mid2, mid3, b, vertices);
+            drawTriangle(mid3, mid1, c, vertices);
+        }
+        drawTriangle(mid1, mid2, mid3, vertices);
+    }
+    else
+    {
+        drawTriangle(a, b, c, vertices);
+    }
+};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -352,22 +413,23 @@ int main()
     bool readyToDraw = false;
 
     int type = 0;
-    std::vector<std::string> typeOptions = {"option 1", "option 2"};
+    int renderedType = 0;
+    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
-    comboWindow->setPosition(Eigen::Vector2i(10, 100));
+    comboWindow->setPosition(Eigen::Vector2i(10, 10));
     comboWindow->setLayout(new nanogui::GroupLayout());
     auto *combo = new nanogui::ComboBox(comboWindow, typeOptions);
     combo->setSelectedIndex(type);
     combo->setCallback([&type](int idx){type = idx;});
 
     nanogui::FormHelper *gui = new nanogui::FormHelper(&screen);
-    nanogui::ref<nanogui::Window> popup = gui->addWindow(Eigen::Vector2i(10, 10), "Set maxDepth");
+    nanogui::ref<nanogui::Window> popup = gui->addWindow(Eigen::Vector2i(10, 150), "Set maxDepth");
 
     int guiMaxDepth = maxDepth;
     nanogui::IntBox<int> *depthBox = gui->addVariable("maxDepth", guiMaxDepth);
     depthBox->setEditable(true);
-    depthBox->setMinValue(1);
+    depthBox->setMinValue(0);
     depthBox->setMaxValue(10);
 
     gui->addButton("Enter", [&, depthBox]() {
@@ -378,11 +440,16 @@ int main()
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-        } else if (type=1){
+        } else if (type==1){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT2(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT2(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+        } else if (type==2){
+            drawKT3(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
+            drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
+            drawKT3(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
+            drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
         };
         
 
@@ -390,6 +457,7 @@ int main()
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
         readyToDraw = true; // <--- Set flag to true
+        renderedType = type;
     });
 
     screen.setVisible(true);
@@ -418,7 +486,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (readyToDraw) { // <--- Only draw if ready
+        if (readyToDraw) {
             ourShader.use();
 
             glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -441,6 +509,28 @@ int main()
 
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+
+            if (renderedType == 1)
+            {
+                glm::mat4 rotatedModel = glm::mat4(1.0f);
+                if (isFirstDown)
+                {
+                    totalRotX = preRotX;
+                    totalRotY = preRotY;
+                }
+                else
+                {
+                    totalRotX = preRotX + rotX;
+                    totalRotY = preRotY + rotY;
+                }
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                ourShader.setMat4("model", rotatedModel);
+
+                glBindVertexArray(VAO);
+                glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+            }
         }
 
         screen.drawContents();
