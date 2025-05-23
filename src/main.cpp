@@ -216,14 +216,14 @@ void draw2D4(
     // Choose colors for each face based on parity
     std::vector<float> col1, col2, col3, col4, col5, col6;
 
-    if(parity==0||parity==4||parity==8){
+    //if(parity==0||parity==4||parity==8){
         col1 = color1;
         col2 = color2;
         col3 = color1;
         col4 = color1;
         col5 = color2;
         col6 = color1;
-    } else if(parity==1||parity==5||parity==9){
+    /*} else if(parity==1||parity==5||parity==9){
         col1 = color1;
         col2 = color2;
         col3 = color1;
@@ -244,7 +244,7 @@ void draw2D4(
         col4 = color1;
         col5 = color2;
         col6 = color1;
-    }
+    }*/
 
     vertices.insert(vertices.end(), a.begin(), a.end());
     vertices.insert(vertices.end(), col1.begin(), col1.end());
