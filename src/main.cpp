@@ -72,6 +72,18 @@ const std::vector<float> f4vertex1 = {-.5f, -.5f, .5f};
 const std::vector<float> f4vertex2 = {-.5f, .5f, -.5f};
 const std::vector<float> f4vertex3 = {.5f, -.5f, -.5f};
 
+// 2:2:3 triangle d8 vertices
+const float sqrt3 = sqrt(3);
+const std::vector<float> eqTVertex1 = {1.0f,0.0f,0.0f};
+const std::vector<float> eqTVertex2 = {-.5f,sqrt3/2.0f,0.0f};
+const std::vector<float> eqTVertex3 = {-.5f,-(sqrt3/2.0f),0.0f};
+
+const std::vector<float> D4Top = {0.0f,0.0f,.4f};
+const std::vector<float> D4Bottom = {0.0f,0.0f,-.4f};
+
+float splitValue = 1.0f/9.0f;
+
+
 std::vector<float> crossProduct(const std::vector<float> &a, const std::vector<float> &b)
 {
     return {
@@ -152,6 +164,14 @@ const std::vector<float> normal2 = normal(f2vertex1, f2vertex2, f2vertex3);
 const std::vector<float> normal3 = normal(f3vertex1, f3vertex2, f3vertex3);
 const std::vector<float> normal4 = normal(f4vertex1, f4vertex2, f4vertex3);
 
+const std::vector<float> d4TopNormal1 = normal(D4Top,eqTVertex1,eqTVertex2);
+const std::vector<float> d4TopNormal2 = normal(D4Top,eqTVertex2,eqTVertex3);
+const std::vector<float> d4TopNormal3 = normal(D4Top,eqTVertex3,eqTVertex1);
+
+const std::vector<float> d4BottomNormal1 = normal(D4Bottom,eqTVertex2,eqTVertex1);
+const std::vector<float> d4BottomNormal2 = normal(D4Bottom,eqTVertex3,eqTVertex2);
+const std::vector<float> d4BottomNormal3 = normal(D4Bottom,eqTVertex1,eqTVertex3);
+
 void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> &vertices)
 {
     std::vector<float> n = normal(a, b, c);
@@ -178,6 +198,111 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
     vertices.insert(vertices.end(), color.begin(), color.end());
     vertices.insert(vertices.end(), c.begin(), c.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
+}
+
+//even parity:
+//Top/a/b and Bottom/a/b will be color1, T/b/c and B/b/c will be color2, T/c/a and B/c/a will be color3
+//odd parity:
+//Top/c/a and Top/a/b will be color1, T/b/c and B/b/c will be color2, B/a/b and B/c/a will be color3
+void draw2D4(
+    const std::vector<float>& a,
+    const std::vector<float>& b,
+    const std::vector<float>& c,
+    const std::vector<float>& top,
+    const std::vector<float>& bottom,
+    int parity,
+    std::vector<float>& vertices)
+{
+    // Choose colors for each face based on parity
+    std::vector<float> col1, col2, col3, col4, col5, col6;
+    if (vectorEquals(normal(top,a,b),d4TopNormal1)||vectorEquals(normal(top,a,b),d4TopNormal2)||vectorEquals(normal(top,a,b),d4TopNormal3)){col1=color1;}
+    else if (vectorEquals(normal(top,a,b),d4BottomNormal1)||vectorEquals(normal(top,a,b),d4BottomNormal2)||vectorEquals(normal(top,a,b),d4BottomNormal3)){col1=color2;}
+    else col1=color3;
+    if (vectorEquals(normal(top,b,c),d4TopNormal1)||vectorEquals(normal(top,b,c),d4TopNormal2)||vectorEquals(normal(top,b,c),d4TopNormal3)){col2=color1;}
+    else if (vectorEquals(normal(top,b,c),d4BottomNormal1)||vectorEquals(normal(top,b,c),d4BottomNormal2)||vectorEquals(normal(top,b,c),d4BottomNormal3)){col2=color2;}
+    else col2=color3;
+    if (vectorEquals(normal(top,c,a),d4TopNormal1)||vectorEquals(normal(top,c,a),d4TopNormal2)||vectorEquals(normal(top,c,a),d4TopNormal3)){col3=color1;}
+    else if (vectorEquals(normal(top,c,a),d4BottomNormal1)||vectorEquals(normal(top,c,a),d4BottomNormal2)||vectorEquals(normal(top,c,a),d4BottomNormal3)){col3=color2;}
+    else col3=color3;
+    if (vectorEquals(normal(bottom,b,a),d4TopNormal1)||vectorEquals(normal(bottom,b,a),d4TopNormal2)||vectorEquals(normal(bottom,b,a),d4TopNormal3)){col4=color1;}
+    else if (vectorEquals(normal(bottom,b,a),d4BottomNormal1)||vectorEquals(normal(bottom,b,a),d4BottomNormal2)||vectorEquals(normal(bottom,b,a),d4BottomNormal3)){col4=color2;}
+    else col4=color3;
+    if (vectorEquals(normal(bottom,c,b),d4TopNormal1)||vectorEquals(normal(bottom,c,b),d4TopNormal2)||vectorEquals(normal(bottom,c,b),d4TopNormal3)){col5=color1;}
+    else if (vectorEquals(normal(bottom,c,b),d4BottomNormal1)||vectorEquals(normal(bottom,c,b),d4BottomNormal2)||vectorEquals(normal(bottom,c,b),d4BottomNormal3)){col5=color2;}
+    else col5=color3;
+    if (vectorEquals(normal(bottom,a,c),d4TopNormal1)||vectorEquals(normal(bottom,a,c),d4TopNormal2)||vectorEquals(normal(bottom,a,c),d4TopNormal3)){col6=color1;}
+    else if (vectorEquals(normal(bottom,a,c),d4BottomNormal1)||vectorEquals(normal(bottom,a,c),d4BottomNormal2)||vectorEquals(normal(bottom,a,c),d4BottomNormal3)){col6=color2;}
+    else col6=color3;
+
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), col1.begin(), col1.end());
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), col1.begin(), col1.end());
+    vertices.insert(vertices.end(), top.begin(), top.end());
+    vertices.insert(vertices.end(), col1.begin(), col1.end());
+
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), col2.begin(), col2.end());
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), col2.begin(), col2.end());
+    vertices.insert(vertices.end(), top.begin(), top.end());
+    vertices.insert(vertices.end(), col2.begin(), col2.end());
+
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), col3.begin(), col3.end());
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), col3.begin(), col3.end());
+    vertices.insert(vertices.end(), top.begin(), top.end());
+    vertices.insert(vertices.end(), col3.begin(), col3.end());
+
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), col4.begin(), col4.end());
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), col4.begin(), col4.end());
+    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
+    vertices.insert(vertices.end(), col4.begin(), col4.end());
+
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), col5.begin(), col5.end());
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), col5.begin(), col5.end());
+    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
+    vertices.insert(vertices.end(), col5.begin(), col5.end());
+
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), col6.begin(), col6.end());
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), col6.begin(), col6.end());
+    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
+    vertices.insert(vertices.end(), col6.begin(), col6.end());
+}
+
+std::vector<float> split(const std::vector<float>& a, const std::vector<float>& b) {
+    std::vector<float> result = a;
+    float t = 4.0f / 9.0f;
+    for (size_t i = 0; i < a.size(); ++i) {
+        result[i] = a[i] + (b[i] - a[i]) * t;
+    }
+    return result;
+}
+
+void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> top, std::vector<float> bottom, int depth, int parity, std::vector<float> &vertices) 
+{
+    if (depth < maxDepth)
+    {
+        std::vector<float> newT1 = split(a,b);
+        std::vector<float> newT2 = split(b,a);
+        std::vector<float> newBot2 = split(b,c);
+        std::vector<float> newBot3 = split(c,b);
+        std::vector<float> newT3 = split(c,a);
+        std::vector<float> newBot1 = split(a,c);
+
+        drawK2D4(a,bottom,top,newT1,newBot1,depth+1,0,vertices);
+        drawK2D4(b,bottom,top,newT2,newBot2,depth+1,0,vertices);
+        drawK2D4(bottom,top,c,newT3,newBot3,depth+1,0,vertices);
+    } else {
+        draw2D4(a,b,c,top,bottom,parity,vertices);
+    }
 }
 
 void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
@@ -239,7 +364,7 @@ void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
     {
         drawTriangle(a, b, c, vertices);
     }
-};
+}
 
 void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
@@ -507,7 +632,7 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski"};
+    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Split Koch"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
     comboWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -599,6 +724,8 @@ int main()
             drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+        }else if (type==5){
+            drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,0,vertices);
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -778,9 +905,9 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
