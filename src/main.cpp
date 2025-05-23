@@ -215,24 +215,36 @@ void draw2D4(
 {
     // Choose colors for each face based on parity
     std::vector<float> col1, col2, col3, col4, col5, col6;
-    if (vectorEquals(normal(top,a,b),d4TopNormal1)||vectorEquals(normal(top,a,b),d4TopNormal2)||vectorEquals(normal(top,a,b),d4TopNormal3)){col1=color1;}
-    else if (vectorEquals(normal(top,a,b),d4BottomNormal1)||vectorEquals(normal(top,a,b),d4BottomNormal2)||vectorEquals(normal(top,a,b),d4BottomNormal3)){col1=color2;}
-    else col1=color3;
-    if (vectorEquals(normal(top,b,c),d4TopNormal1)||vectorEquals(normal(top,b,c),d4TopNormal2)||vectorEquals(normal(top,b,c),d4TopNormal3)){col2=color1;}
-    else if (vectorEquals(normal(top,b,c),d4BottomNormal1)||vectorEquals(normal(top,b,c),d4BottomNormal2)||vectorEquals(normal(top,b,c),d4BottomNormal3)){col2=color2;}
-    else col2=color3;
-    if (vectorEquals(normal(top,c,a),d4TopNormal1)||vectorEquals(normal(top,c,a),d4TopNormal2)||vectorEquals(normal(top,c,a),d4TopNormal3)){col3=color1;}
-    else if (vectorEquals(normal(top,c,a),d4BottomNormal1)||vectorEquals(normal(top,c,a),d4BottomNormal2)||vectorEquals(normal(top,c,a),d4BottomNormal3)){col3=color2;}
-    else col3=color3;
-    if (vectorEquals(normal(bottom,b,a),d4TopNormal1)||vectorEquals(normal(bottom,b,a),d4TopNormal2)||vectorEquals(normal(bottom,b,a),d4TopNormal3)){col4=color1;}
-    else if (vectorEquals(normal(bottom,b,a),d4BottomNormal1)||vectorEquals(normal(bottom,b,a),d4BottomNormal2)||vectorEquals(normal(bottom,b,a),d4BottomNormal3)){col4=color2;}
-    else col4=color3;
-    if (vectorEquals(normal(bottom,c,b),d4TopNormal1)||vectorEquals(normal(bottom,c,b),d4TopNormal2)||vectorEquals(normal(bottom,c,b),d4TopNormal3)){col5=color1;}
-    else if (vectorEquals(normal(bottom,c,b),d4BottomNormal1)||vectorEquals(normal(bottom,c,b),d4BottomNormal2)||vectorEquals(normal(bottom,c,b),d4BottomNormal3)){col5=color2;}
-    else col5=color3;
-    if (vectorEquals(normal(bottom,a,c),d4TopNormal1)||vectorEquals(normal(bottom,a,c),d4TopNormal2)||vectorEquals(normal(bottom,a,c),d4TopNormal3)){col6=color1;}
-    else if (vectorEquals(normal(bottom,a,c),d4BottomNormal1)||vectorEquals(normal(bottom,a,c),d4BottomNormal2)||vectorEquals(normal(bottom,a,c),d4BottomNormal3)){col6=color2;}
-    else col6=color3;
+
+    if(parity==0||parity==4||parity==8){
+        col1 = color1;
+        col2 = color2;
+        col3 = color1;
+        col4 = color1;
+        col5 = color2;
+        col6 = color1;
+    } else if(parity==1||parity==5||parity==9){
+        col1 = color1;
+        col2 = color2;
+        col3 = color1;
+        col4 = color1;
+        col5 = color2;
+        col6 = color1;
+    } else if(parity==2||parity==6||parity==10){
+        col1 = color1;
+        col2 = color2;
+        col3 = color1;
+        col4 = color1;
+        col5 = color2;
+        col6 = color1;
+    } else if(parity==3||parity==7||parity==11){
+        col1 = color1;
+        col2 = color2;
+        col3 = color1;
+        col4 = color1;
+        col5 = color2;
+        col6 = color1;
+    }
 
     vertices.insert(vertices.end(), a.begin(), a.end());
     vertices.insert(vertices.end(), col1.begin(), col1.end());
@@ -297,9 +309,9 @@ void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, 
         std::vector<float> newT3 = split(c,a);
         std::vector<float> newBot1 = split(a,c);
 
-        drawK2D4(a,bottom,top,newT1,newBot1,depth+1,0,vertices);
-        drawK2D4(b,bottom,top,newT2,newBot2,depth+1,0,vertices);
-        drawK2D4(bottom,top,c,newT3,newBot3,depth+1,0,vertices);
+        drawK2D4(a,bottom,top,newT1,newBot1,depth+1,parity+1,vertices);
+        drawK2D4(b,bottom,top,newT2,newBot2,depth+1,parity+1,vertices);
+        drawK2D4(c,bottom,top,newT3,newBot3,depth+1,parity++,vertices);
     } else {
         draw2D4(a,b,c,top,bottom,parity,vertices);
     }
