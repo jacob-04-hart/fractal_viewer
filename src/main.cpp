@@ -27,6 +27,8 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+glm::vec3 lightPos(0.5f, 1.0f, 2.0f);
+
 bool isFirstDown = true;
 bool justStartedDragging = false;
 
@@ -48,7 +50,7 @@ float lastFrame = 0.0f;
 std::vector<float> color1 = {1.0f, 0.0f, 0.0f}; // red
 std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
 std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
-std::vector<float> color4 = {1.0f, 1.0f, 0.0f}; // yellow
+std::vector<float> color4 = {1.0f, 0.5f, 0.0f}; // orange
 
 unsigned int maxDepth = 3; // change this to either save or set fire to your computer
 
@@ -75,13 +77,13 @@ const std::vector<float> f4vertex3 = {.5f, -.5f, -.5f};
 // 2:2:3 triangle d8 vertices
 const float sqrt3 = sqrt(3);
 const std::vector<float> eqTVertex1 = {1.0f,0.0f,0.0f};
-const std::vector<float> eqTVertex2 = {-.5f,sqrt3/2.0f,0.0f};
-const std::vector<float> eqTVertex3 = {-.5f,-(sqrt3/2.0f),0.0f};
+const std::vector<float> eqTVertex2 = {-.5f,-(sqrt3/2.0f),0.0f};
+const std::vector<float> eqTVertex3 = {-.5f,sqrt3/2.0f,0.0f};
 
-const std::vector<float> D4Top = {0.0f,0.0f,.4f};
-const std::vector<float> D4Bottom = {0.0f,0.0f,-.4f};
+const std::vector<float> D4Top = {0.0f,0.0f,-.4f};
+const std::vector<float> D4Bottom = {0.0f,0.0f,.4f};
 
-float splitValue = 1.0f/9.0f;
+float splitValue = 10.0f;
 
 
 std::vector<float> crossProduct(const std::vector<float> &a, const std::vector<float> &b)
@@ -194,111 +196,103 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
     const std::vector<float> &color = faceColors[bestFace];
     vertices.insert(vertices.end(), a.begin(), a.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), b.begin(), b.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), c.begin(), c.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 }
 
-//even parity:
-//Top/a/b and Bottom/a/b will be color1, T/b/c and B/b/c will be color2, T/c/a and B/c/a will be color3
-//odd parity:
-//Top/c/a and Top/a/b will be color1, T/b/c and B/b/c will be color2, B/a/b and B/c/a will be color3
-void draw2D4(
-    const std::vector<float>& a,
-    const std::vector<float>& b,
-    const std::vector<float>& c,
-    const std::vector<float>& top,
-    const std::vector<float>& bottom,
-    int parity,
-    std::vector<float>& vertices)
+void draw2D4(const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& top, const std::vector<float>& bottom,
+        std::vector<float>& vertices, 
+        std::vector<float> f1, std::vector<float> f2, std::vector<float> f3,
+        std::vector<float> b1, std::vector<float> b2, std::vector<float> b3) 
 {
-    // Choose colors for each face based on parity
-    std::vector<float> col1, col2, col3, col4, col5, col6;
+    assert(f1.size() == 3 && f2.size() == 3 && f3.size() == 3);
+    assert(b1.size() == 3 && b2.size() == 3 && b3.size() == 3);
 
-    //if(parity==0||parity==4||parity==8){
-        col1 = color1;
-        col2 = color2;
-        col3 = color1;
-        col4 = color1;
-        col5 = color2;
-        col6 = color1;
-    /*} else if(parity==1||parity==5||parity==9){
-        col1 = color1;
-        col2 = color2;
-        col3 = color1;
-        col4 = color1;
-        col5 = color2;
-        col6 = color1;
-    } else if(parity==2||parity==6||parity==10){
-        col1 = color1;
-        col2 = color2;
-        col3 = color1;
-        col4 = color1;
-        col5 = color2;
-        col6 = color1;
-    } else if(parity==3||parity==7||parity==11){
-        col1 = color1;
-        col2 = color2;
-        col3 = color1;
-        col4 = color1;
-        col5 = color2;
-        col6 = color1;
-    }*/
-
+    std::vector<float> n = normal(a, b, top);
     vertices.insert(vertices.end(), a.begin(), a.end());
-    vertices.insert(vertices.end(), col1.begin(), col1.end());
+    vertices.insert(vertices.end(), f1.begin(), f1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), b.begin(), b.end());
-    vertices.insert(vertices.end(), col1.begin(), col1.end());
+    vertices.insert(vertices.end(), f1.begin(), f1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), top.begin(), top.end());
-    vertices.insert(vertices.end(), col1.begin(), col1.end());
+    vertices.insert(vertices.end(), f1.begin(), f1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 
+    n = normal(b, c, top);
     vertices.insert(vertices.end(), b.begin(), b.end());
-    vertices.insert(vertices.end(), col2.begin(), col2.end());
+    vertices.insert(vertices.end(), f2.begin(), f2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), c.begin(), c.end());
-    vertices.insert(vertices.end(), col2.begin(), col2.end());
+    vertices.insert(vertices.end(), f2.begin(), f2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), top.begin(), top.end());
-    vertices.insert(vertices.end(), col2.begin(), col2.end());
+    vertices.insert(vertices.end(), f2.begin(), f2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 
+    n = normal(c, a, top);
     vertices.insert(vertices.end(), c.begin(), c.end());
-    vertices.insert(vertices.end(), col3.begin(), col3.end());
+    vertices.insert(vertices.end(), f3.begin(), f3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), a.begin(), a.end());
-    vertices.insert(vertices.end(), col3.begin(), col3.end());
+    vertices.insert(vertices.end(), f3.begin(), f3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), top.begin(), top.end());
-    vertices.insert(vertices.end(), col3.begin(), col3.end());
+    vertices.insert(vertices.end(), f3.begin(), f3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 
+    n = normal(a, bottom, b);
     vertices.insert(vertices.end(), a.begin(), a.end());
-    vertices.insert(vertices.end(), col4.begin(), col4.end());
-    vertices.insert(vertices.end(), b.begin(), b.end());
-    vertices.insert(vertices.end(), col4.begin(), col4.end());
+    vertices.insert(vertices.end(), b1.begin(), b1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), bottom.begin(), bottom.end());
-    vertices.insert(vertices.end(), col4.begin(), col4.end());
-
+    vertices.insert(vertices.end(), b1.begin(), b1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), b.begin(), b.end());
-    vertices.insert(vertices.end(), col5.begin(), col5.end());
-    vertices.insert(vertices.end(), c.begin(), c.end());
-    vertices.insert(vertices.end(), col5.begin(), col5.end());
-    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
-    vertices.insert(vertices.end(), col5.begin(), col5.end());
+    vertices.insert(vertices.end(), b1.begin(), b1.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 
+    n = normal(b, bottom, c);
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), b2.begin(), b2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
+    vertices.insert(vertices.end(), b2.begin(), b2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), c.begin(), c.end());
-    vertices.insert(vertices.end(), col6.begin(), col6.end());
+    vertices.insert(vertices.end(), b2.begin(), b2.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+
+    n = normal(c, bottom, a);
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), b3.begin(), b3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
+    vertices.insert(vertices.end(), b3.begin(), b3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
     vertices.insert(vertices.end(), a.begin(), a.end());
-    vertices.insert(vertices.end(), col6.begin(), col6.end());
-    vertices.insert(vertices.end(), bottom.begin(), bottom.end());
-    vertices.insert(vertices.end(), col6.begin(), col6.end());
+    vertices.insert(vertices.end(), b3.begin(), b3.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
 }
 
 std::vector<float> split(const std::vector<float>& a, const std::vector<float>& b) {
     std::vector<float> result = a;
-    float t = 4.0f / 9.0f;
+    float d = (splitValue - 1)/2;
+    float t = d / splitValue;
     for (size_t i = 0; i < a.size(); ++i) {
         result[i] = a[i] + (b[i] - a[i]) * t;
     }
     return result;
 }
 
-void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> top, std::vector<float> bottom, int depth, int parity, std::vector<float> &vertices) 
+void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> top, std::vector<float> bottom, int depth, std::vector<float> &vertices, 
+            std::vector<float> f1, std::vector<float> f2, std::vector<float> f3,
+            std::vector<float> b1, std::vector<float> b2, std::vector<float> b3) 
 {
     if (depth < maxDepth)
     {
@@ -309,11 +303,11 @@ void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, 
         std::vector<float> newT3 = split(c,a);
         std::vector<float> newBot1 = split(a,c);
 
-        drawK2D4(a,bottom,top,newT1,newBot1,depth+1,parity+1,vertices);
-        drawK2D4(b,bottom,top,newT2,newBot2,depth+1,parity+1,vertices);
-        drawK2D4(c,bottom,top,newT3,newBot3,depth+1,parity++,vertices);
+        drawK2D4(a,bottom,top,newT1,newBot1,depth+1,vertices,b1,color4,f1,b3,color4,f3);
+        drawK2D4(b,top,bottom,newT2,newBot2,depth+1,vertices,f1,color4,b1,b2,color4,f2);
+        drawK2D4(c,bottom,top,newT3,newBot3,depth+1,vertices,b3,color4,f3,b2,color4,f2);
     } else {
-        draw2D4(a,b,c,top,bottom,parity,vertices);
+        draw2D4(a,b,c,top,bottom,vertices,f1,f2,f3,b1,b2,b3);
     }
 }
 
@@ -366,9 +360,9 @@ void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
         }
         else
         {
-            drawTriangle(mid2, mid1, a, vertices);
-            drawTriangle(mid3, mid2, b, vertices);
-            drawTriangle(mid1, mid3, c, vertices);
+            drawTriangle(a, mid2, mid1, vertices);
+            drawTriangle(b, mid3, mid2, vertices);
+            drawTriangle(c, mid1, mid3, vertices);
         }
         //drawTriangle(mid1, mid2, mid3, vertices);
     }
@@ -428,9 +422,9 @@ void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
         }
         else
         {
-            drawTriangle(mid2, mid1, a, vertices);
-            drawTriangle(mid3, mid2, b, vertices);
-            drawTriangle(mid1, mid3, c, vertices);
+            drawTriangle(a, mid2, mid1, vertices);
+            drawTriangle(b, mid3, mid2, vertices);
+            drawTriangle(c, mid1, mid3, vertices);
         }
         drawTriangle(mid1, mid2, mid3, vertices);
     }
@@ -489,9 +483,9 @@ void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
         }
         else
         {
-            drawTriangle(mid1, mid2, a, vertices);
-            drawTriangle(mid2, mid3, b, vertices);
-            drawTriangle(mid3, mid1, c, vertices);
+            drawTriangle(a, mid2, mid1, vertices);
+            drawTriangle(b, mid3, mid2, vertices);
+            drawTriangle(c, mid1, mid3, vertices);
         }
         drawTriangle(mid1, mid2, mid3, vertices);
     }
@@ -571,7 +565,7 @@ void drawInverseST(std::vector<float> a, std::vector<float> b, std::vector<float
     std::vector<float> rotated3 = rotateAroundAxis(inner3, center, n, angle);
 
     drawTriangle(mid1, mid2, mid3, vertices);
-    drawTriangle(rotated1, rotated2, rotated3, vertices);
+    drawTriangle(rotated1, rotated3, rotated2, vertices);
     if (depth < maxDepth)
     {
         drawInverseST(a, mid1, mid3, depth + 1, vertices);
@@ -644,7 +638,7 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Koch Tetrahedron", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Split Koch"};
+    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
     comboWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -712,10 +706,7 @@ int main()
         color4 = {c4.r(), c4.g(), c4.b()};
         vertices.clear();
         if (type==0){
-            drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
-            drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
-            drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
-            drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
         } else if (type==1){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -737,7 +728,10 @@ int main()
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
         }else if (type==5){
-            drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,0,vertices);
+            drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
+            drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
+            drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
+            drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -754,11 +748,14 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // normal attribute
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -775,6 +772,9 @@ int main()
 
         if (readyToDraw) {
             ourShader.use();
+            ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+            ourShader.setVec3("lightPos", lightPos);
+            ourShader.setVec3("viewPos", camera.Position); 
 
             glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
             ourShader.setMat4("projection", projection);
@@ -795,7 +795,7 @@ int main()
             ourShader.setMat4("model", model);
 
             glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
 
             if (renderedType == 1)
             {
@@ -817,7 +817,7 @@ int main()
                 ourShader.setMat4("model", rotatedModel);
 
                 glBindVertexArray(VAO);
-                glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
+                glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
             }
         }
 
