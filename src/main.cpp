@@ -52,7 +52,7 @@ std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
 std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
 std::vector<float> color4 = {1.0f, 0.5f, 0.0f}; // orange
 
-unsigned int maxDepth = 3; // change this to either save or set fire to your computer
+unsigned int maxDepth = 6; // change this to either save or set fire to your computer
 
 // Face 1
 const std::vector<float> f1vertex1 = {.5f, .5f, .5f};
