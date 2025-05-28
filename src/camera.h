@@ -26,6 +26,7 @@ class Camera
 {
 public:
     // camera Attributes
+    glm::dvec2 mandelbrotOffset = glm::vec2(-0.5, 0.0);
     glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
@@ -38,6 +39,7 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    double mandelbrotZoom = 3.0;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -68,14 +70,23 @@ public:
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
         float velocity = MovementSpeed * deltaTime;
-        if (direction == UP)
+        double mVelocity = MovementSpeed * deltaTime * mandelbrotZoom;
+        if (direction == UP){
             Position += Up * velocity;
-        if (direction == DOWN)
+            mandelbrotOffset.y += mVelocity;
+        }
+        if (direction == DOWN){
             Position -= Up * velocity;
-        if (direction == LEFT)
+            mandelbrotOffset.y -= mVelocity;
+        }
+        if (direction == LEFT){
             Position -= Right * velocity;
-        if (direction == RIGHT)
+            mandelbrotOffset.x -= mVelocity;
+        }
+        if (direction == RIGHT){
             Position += Right * velocity;
+            mandelbrotOffset.x += mVelocity;
+        }
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -103,6 +114,11 @@ public:
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
+        float zoomStep = mandelbrotZoom * 0.1f; // 10% of current zoom
+        mandelbrotZoom -= yoffset * zoomStep;
+        if (mandelbrotZoom > 10.0f)
+            mandelbrotZoom = 10.0f;
+
         Zoom -= (float)yoffset;
         if (Zoom < 1.0f)
             Zoom = 1.0f;

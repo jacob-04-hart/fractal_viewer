@@ -20,8 +20,8 @@
 #include "fractal_utils.h"
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+unsigned int SCR_WIDTH = 1500;
+unsigned int SCR_HEIGHT = 1000;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -105,29 +105,31 @@ int main()
 
     Shader ourShader("../src/shader.vs", "../src/shader.fs");
 
+    Shader mandelShader("../src/mandelbrot.vs", "../src/mandelbrot.fs");
+
     std::vector<float> vertices;
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
-    bool readyToDraw = false;
+    bool readyToDraw3D = false;
+    bool readyToDraw2D = false;
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge"};
+    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge", "Mandelbrot"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
     comboWindow->setPosition(Eigen::Vector2i(10, 10));
     comboWindow->setLayout(new nanogui::GroupLayout());
     auto *combo = new nanogui::ComboBox(comboWindow, typeOptions);
     combo->setSelectedIndex(type);
-    combo->setCallback([&type](int idx)
-                       { type = idx; });
+    combo->setFixedWidth(230);
 
     nanogui::ref<nanogui::Window> colorsWindow = new nanogui::Window(&screen, "Colors");
     colorsWindow->setPosition(Eigen::Vector2i(10, 110));
     colorsWindow->setLayout(new nanogui::GroupLayout());
-    colorsWindow->setSize(Eigen::Vector2i(250, 400));
+    colorsWindow->setSize(Eigen::Vector2i(250, 500));
     nanogui::TabWidget *colors = new nanogui::TabWidget(colorsWindow);
     
     nanogui::Widget* layer1 = colors->createTab("1");
@@ -135,6 +137,7 @@ int main()
     new nanogui::Label(layer1, "Color 1");
     nanogui::ColorWheel *colorWheel1 = new nanogui::ColorWheel(layer1);
     colorWheel1->setColor(nanogui::Color(color1[0], color1[1], color1[2], 1.0f));
+    colors->setFixedSize(Eigen::Vector2i(230, 175));
 
     nanogui::Widget* layer2 = colors->createTab("2");
     layer2->setLayout(new nanogui::GroupLayout());
@@ -154,12 +157,27 @@ int main()
     nanogui::ColorWheel *colorWheel4 = new nanogui::ColorWheel(layer4);
     colorWheel4->setColor(nanogui::Color(color4[0], color4[1], color4[2], 1.0f));
 
+    nanogui::Widget* layer5 = colors->createTab("5");
+    layer5->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer5, "Color 5");
+    nanogui::ColorWheel *colorWheel5 = new nanogui::ColorWheel(layer5);
+    colorWheel5->setColor(nanogui::Color(color5[0], color5[1], color5[2], 1.0f));
+
+    nanogui::Widget* layer6 = colors->createTab("6");
+    layer6->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer6, "Color 6");
+    nanogui::ColorWheel *colorWheel6 = new nanogui::ColorWheel(layer6);
+    colorWheel6->setColor(nanogui::Color(color6[0], color6[1], color6[2], 1.0f));
+
+    colors->setActiveTab(0);
+
     nanogui::ref<nanogui::Window> paramsWindow = new nanogui::Window(&screen, "Parameters");
     paramsWindow->setPosition(Eigen::Vector2i(10, 360));
     paramsWindow->setLayout(new nanogui::GroupLayout());
-    paramsWindow->setSize(Eigen::Vector2i(250, 250));
+    paramsWindow->setSize(Eigen::Vector2i(250, 400));
     nanogui::Widget *params = new nanogui::Widget(paramsWindow);
     params->setLayout(new nanogui::GroupLayout());
+    paramsWindow->setFixedWidth(260);
 
     params->add<nanogui::Label>("Recursive Depth");
     int guiMaxDepth = initialMaxDepth;
@@ -168,6 +186,13 @@ int main()
     depthBox->setEditable(true);
     depthBox->setMinValue(0);
     depthBox->setMaxValue(10);
+
+    combo->setCallback([&type, depthBox](int idx){ 
+        type = idx;
+        if (type==6){
+            depthBox->setValue(4);
+        }
+    });
 
     nanogui::Button *generateButton = new nanogui::Button(params, "Generate");
     generateButton->setCallback([&, depthBox]() {
@@ -183,39 +208,63 @@ int main()
         vertices.clear();
         if (type==0){
             drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         } else if (type==1){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT2(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT2(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         } else if (type==2){
             drawKT3(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT3(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         }else if (type==3){
             drawST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         }else if (type==4){
             drawInverseST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         }else if (type==5){
             drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
         }else if (type==6){
             drawSponge(cubeVert1,cubeVert2,cubeVert3,cubeVert4,cubeVert5,cubeVert6,cubeVert7,cubeVert8,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+        }else if (type==7){
+            vertices = {
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+            readyToDraw2D = true;
+            readyToDraw3D = false;
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-        readyToDraw = true; // <--- Set flag to true
         renderedType = type;
     });
 
@@ -238,7 +287,12 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
-    {
+    {   
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        SCR_WIDTH = width;
+        SCR_HEIGHT = height;
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -248,7 +302,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (readyToDraw) {
+        if (readyToDraw3D) {
             ourShader.use();
             ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
             ourShader.setVec3("lightPos", lightPos);
@@ -297,6 +351,17 @@ int main()
                 glBindVertexArray(VAO);
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
             }
+        } else if(readyToDraw2D) {
+            mandelShader.use();
+            mandelShader.setInt("maxItr",500);
+
+            GLint zoomLoc = glGetUniformLocation(mandelShader.ID, "zoom");
+            GLint offsetLoc = glGetUniformLocation(mandelShader.ID, "offset");
+            glUniform1d(zoomLoc, camera.mandelbrotZoom);
+            glUniform2d(offsetLoc, camera.mandelbrotOffset.x, camera.mandelbrotOffset.y);
+
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
         }
 
         screen.drawContents();
