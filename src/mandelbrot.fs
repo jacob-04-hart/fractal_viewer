@@ -5,7 +5,11 @@ out vec4 FragColor;
 
 uniform int maxItr;														
 uniform double zoom;																								
-uniform dvec2 offset;																						
+uniform dvec2 offset;	
+uniform vec3 color1;
+uniform vec3 color2;
+uniform vec3 color3;
+uniform float cycles;																			
 
 double get_iterations() {
     double real = (uv.x - 0.5) * zoom + offset.x;
@@ -36,12 +40,28 @@ vec3 hsv2rgb(vec3 c) {
 }
 
 vec4 mapColor(double t) {
-    float hue = float(0.95 + 10.0 * t); // 0.0-1.0, adjust multiplier for more cycles
+    float hue = float(0.95 + 10.0 * t);
     hue = fract(hue);
     float sat = 0.6;
     float val = 1.0;
     vec3 rgb = hsv2rgb(vec3(hue, sat, val));
     return vec4(rgb, 1.0);
+}
+
+vec3 palette(float t) {
+    // t in [0,1]
+    if (t < 0.1666)
+        return color1;
+    else if (t < 0.3333)
+        return mix(color1, color2, (t - 0.1666) / 0.1666);
+    else if (t < 0.5)
+        return color2;
+    else if (t < 0.6666)
+        return mix(color2, color3, (t - 0.6666) / 0.1666);
+    else if (t < .8333)
+        return color3;
+    else
+        return mix(color3, color1, (t - 0.8333) / 0.1666);
 }
 
 void main() {
@@ -50,7 +70,8 @@ void main() {
     if (iterations >= maxItr) {
         FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
-        double t = iterations / double(maxItr);
-        FragColor = mapColor(t);
+        float t = float(iterations) / float(maxItr);
+        //FragColor = vec4(palette(fract(t*cycles)), 1.0);
+        FragColor = mapColor(t*cycles);
     }
 }

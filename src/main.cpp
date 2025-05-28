@@ -119,18 +119,18 @@ int main()
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge", "Mandelbrot"};
 
-    nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
-    comboWindow->setPosition(Eigen::Vector2i(10, 10));
-    comboWindow->setLayout(new nanogui::GroupLayout());
-    auto *combo = new nanogui::ComboBox(comboWindow, typeOptions);
+    nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
+    mainWindow->setPosition(Eigen::Vector2i(10, 10));
+    mainWindow->setLayout(new nanogui::GroupLayout());
+    mainWindow->setSize(Eigen::Vector2i(270, 1000));
+
+    new nanogui::Label(mainWindow, "Type");
+    auto *combo = new nanogui::ComboBox(mainWindow, typeOptions);
     combo->setSelectedIndex(type);
     combo->setFixedWidth(230);
 
-    nanogui::ref<nanogui::Window> colorsWindow = new nanogui::Window(&screen, "Colors");
-    colorsWindow->setPosition(Eigen::Vector2i(10, 110));
-    colorsWindow->setLayout(new nanogui::GroupLayout());
-    colorsWindow->setSize(Eigen::Vector2i(250, 500));
-    nanogui::TabWidget *colors = new nanogui::TabWidget(colorsWindow);
+    new nanogui::Label(mainWindow, "Colors");
+    nanogui::TabWidget *colors = new nanogui::TabWidget(mainWindow);
     
     nanogui::Widget* layer1 = colors->createTab("1");
     layer1->setLayout(new nanogui::GroupLayout());
@@ -171,21 +171,24 @@ int main()
 
     colors->setActiveTab(0);
 
-    nanogui::ref<nanogui::Window> paramsWindow = new nanogui::Window(&screen, "Parameters");
-    paramsWindow->setPosition(Eigen::Vector2i(10, 360));
-    paramsWindow->setLayout(new nanogui::GroupLayout());
-    paramsWindow->setSize(Eigen::Vector2i(250, 400));
-    nanogui::Widget *params = new nanogui::Widget(paramsWindow);
+    new nanogui::Label(mainWindow, "Parameters");
+    nanogui::Widget *params = new nanogui::Widget(mainWindow);
     params->setLayout(new nanogui::GroupLayout());
-    paramsWindow->setFixedWidth(260);
-
+    params->setFixedWidth(260);
     params->add<nanogui::Label>("Recursive Depth");
-    int guiMaxDepth = initialMaxDepth;
-    nanogui::IntBox<int> *depthBox = new nanogui::IntBox<int>(params);
-    depthBox->setValue(guiMaxDepth);
+
+    nanogui::Widget *depthBoxContainer = new nanogui::Widget(params);
+    depthBoxContainer->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal,
+                                                        nanogui::Alignment::Middle, 0, 0));
+
+    new nanogui::Widget(depthBoxContainer);
+
+    nanogui::IntBox<int> *depthBox = new nanogui::IntBox<int>(depthBoxContainer);
+    depthBox->setValue(initialMaxDepth);
     depthBox->setEditable(true);
     depthBox->setMinValue(0);
-    depthBox->setMaxValue(10);
+    depthBox->setMaxValue(15);
+    depthBox->setFixedWidth(60);
 
     combo->setCallback([&type, depthBox](int idx){ 
         type = idx;
@@ -194,7 +197,15 @@ int main()
         }
     });
 
-    nanogui::Button *generateButton = new nanogui::Button(params, "Generate");
+    nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
+    generateButtonContainer->setLayout(new nanogui::BoxLayout(
+        nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 0));
+
+    new nanogui::Widget(generateButtonContainer);
+
+    nanogui::Button *generateButton = new nanogui::Button(generateButtonContainer, "Generate");
+    generateButton->setFixedWidth(240);
+
     generateButton->setCallback([&, depthBox]() {
         setMaxDepth(depthBox->value());
         nanogui::Color c1 = colorWheel1->color();
@@ -353,7 +364,14 @@ int main()
             }
         } else if(readyToDraw2D) {
             mandelShader.use();
-            mandelShader.setInt("maxItr",500);
+            mandelShader.setInt("maxItr",200);
+            mandelShader.setVec3("color1", glm::vec3(color1[0], color1[1], color1[2]));
+            mandelShader.setVec3("color2", glm::vec3(color2[0], color2[1], color2[2]));
+            mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
+
+            float time = glfwGetTime();
+            float cycles = 1.0f + time * 0.5f;
+            mandelShader.setFloat("cycles", cycles);
 
             GLint zoomLoc = glGetUniformLocation(mandelShader.ID, "zoom");
             GLint offsetLoc = glGetUniformLocation(mandelShader.ID, "offset");
