@@ -8,6 +8,8 @@ std::vector<float> color1 = {1.0f, 0.0f, 0.0f}; // red
 std::vector<float> color2 = {0.0f, 1.0f, 0.0f}; // green
 std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
 std::vector<float> color4 = {1.0f, 0.5f, 0.0f}; // orange
+std::vector<float> color5 = {1.0f, 1.0f, 0.0f}; // yellow
+std::vector<float> color6 = {0.5f, 0.0f, 0.5f}; // purple
 
 unsigned int maxDepth = 6; // change this to either save or set fire to your computer
 
@@ -39,6 +41,16 @@ const std::vector<float> eqTVertex3 = {-.5f,sqrt3/2.0f,0.0f};
 
 const std::vector<float> D4Top = {0.0f,0.0f,-.4f};
 const std::vector<float> D4Bottom = {0.0f,0.0f,.4f};
+
+// cube vertices
+const std::vector<float> cubeVert1 = {-.5f,.5f,-.5f};
+const std::vector<float> cubeVert2 = {.5f,.5f,-.5f};
+const std::vector<float> cubeVert3 = {-.5f,-.5f,-.5f};
+const std::vector<float> cubeVert4 = {.5f,-.5f,-.5f};
+const std::vector<float> cubeVert5 = {-.5f,.5f,.5f};
+const std::vector<float> cubeVert6 = {.5f,.5f,.5f};
+const std::vector<float> cubeVert7 = {-.5f,-.5f,.5f};
+const std::vector<float> cubeVert8 = {.5f,-.5f,.5f};
 
 void setMaxDepth(int depth)
 {
@@ -256,6 +268,104 @@ std::vector<float> split(const std::vector<float>& a, const std::vector<float>& 
     return result;
 }
 
+std::vector<float> thirdSplit(const std::vector<float>& a, const std::vector<float>& b) {
+    std::vector<float> result = a;
+    float t = 1.0f / 3.0f;
+    for (size_t i = 0; i < a.size(); ++i) {
+        result[i] = a[i] + (b[i] - a[i]) * t;
+    }
+    return result;
+}
+
+void drawSquare(std::vector<float> a,std::vector<float> b,std::vector<float> c,std::vector<float> d,std::vector<float> color,std::vector<float> &vertices)
+{
+    std::vector<float> n = unnormalizedNormal(a, b, c);
+
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+
+    vertices.insert(vertices.end(), d.begin(), d.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+}
+
+void drawSponge(std::vector<float> one, std::vector<float> two, std::vector<float> three, std::vector<float> four, 
+            std::vector<float> five, std::vector<float> six, std::vector<float> seven, std::vector<float> eight, int depth, std::vector<float> &vertices)
+{
+    if (depth < maxDepth)
+    {
+        std::vector<std::vector<float>> cornerOne = {
+        thirdSplit(one,one), thirdSplit(one,two), thirdSplit(one,three), thirdSplit(one,four), thirdSplit(one,five), thirdSplit(one,six), thirdSplit(one,seven), thirdSplit(one,eight)};
+        
+        std::vector<std::vector<float>> cornerTwo = {
+        thirdSplit(two,one), thirdSplit(two,two), thirdSplit(two,three), thirdSplit(two,four), thirdSplit(two,five), thirdSplit(two,six), thirdSplit(two,seven), thirdSplit(two,eight)};
+        
+        std::vector<std::vector<float>> cornerThree = {
+        thirdSplit(three,one), thirdSplit(three,two), thirdSplit(three,three), thirdSplit(three,four), thirdSplit(three,five), thirdSplit(three,six), thirdSplit(three,seven), thirdSplit(three,eight)};
+        
+        std::vector<std::vector<float>> cornerFour = {
+        thirdSplit(four,one), thirdSplit(four,two), thirdSplit(four,three), thirdSplit(four,four), thirdSplit(four,five), thirdSplit(four,six), thirdSplit(four,seven), thirdSplit(four,eight)};
+        
+        std::vector<std::vector<float>> cornerFive = {
+        thirdSplit(five,one), thirdSplit(five,two), thirdSplit(five,three), thirdSplit(five,four), thirdSplit(five,five), thirdSplit(five,six), thirdSplit(five,seven), thirdSplit(five,eight)};
+        
+        std::vector<std::vector<float>> cornerSix = {
+        thirdSplit(six,one), thirdSplit(six,two), thirdSplit(six,three), thirdSplit(six,four), thirdSplit(six,five), thirdSplit(six,six), thirdSplit(six,seven), thirdSplit(six,eight)};
+        
+        std::vector<std::vector<float>> cornerSeven = {
+        thirdSplit(seven,one), thirdSplit(seven,two), thirdSplit(seven,three), thirdSplit(seven,four), thirdSplit(seven,five), thirdSplit(seven,six), thirdSplit(seven,seven), thirdSplit(seven,eight)};
+        
+        std::vector<std::vector<float>> cornerEight = {
+        thirdSplit(eight,one), thirdSplit(eight,two), thirdSplit(eight,three), thirdSplit(eight,four), thirdSplit(eight,five), thirdSplit(eight,six), thirdSplit(eight,seven), thirdSplit(eight,eight)};
+        
+        // corner cubes
+        drawSponge(one,cornerOne[1],cornerOne[2],cornerOne[3],cornerOne[4],cornerOne[5],cornerOne[6],cornerOne[7],depth+1,vertices);
+        drawSponge(cornerTwo[0],two,cornerTwo[2],cornerTwo[3],cornerTwo[4],cornerTwo[5],cornerTwo[6],cornerTwo[7],depth+1,vertices);
+        drawSponge(cornerThree[0],cornerThree[1],three,cornerThree[3],cornerThree[4],cornerThree[5],cornerThree[6],cornerThree[7],depth+1,vertices);
+        drawSponge(cornerFour[0],cornerFour[1],cornerFour[2],four,cornerFour[4],cornerFour[5],cornerFour[6],cornerFour[7],depth+1,vertices);
+        drawSponge(cornerFive[0],cornerFive[1],cornerFive[2],cornerFive[3],five,cornerFive[5],cornerFive[6],cornerFive[7],depth+1,vertices);
+        drawSponge(cornerSix[0],cornerSix[1],cornerSix[2],cornerSix[3],cornerSix[4],six,cornerSix[6],cornerSix[7],depth+1,vertices);
+        drawSponge(cornerSeven[0],cornerSeven[1],cornerSeven[2],cornerSeven[3],cornerSeven[4],cornerSeven[5],seven,cornerSeven[7],depth+1,vertices);
+        drawSponge(cornerEight[0],cornerEight[1],cornerEight[2],cornerEight[3],cornerEight[4],cornerEight[5],cornerEight[6],eight,depth+1,vertices);
+        
+        // edge cubes
+        drawSponge(cornerOne[1],cornerTwo[0],cornerOne[3],cornerTwo[2],cornerOne[5],cornerTwo[4],cornerOne[7],cornerTwo[6],depth+1,vertices);
+        drawSponge(cornerThree[1],cornerFour[0],cornerThree[3],cornerFour[2],cornerThree[5],cornerFour[4],cornerThree[7],cornerFour[6],depth+1,vertices);
+        drawSponge(cornerFive[1],cornerSix[0],cornerFive[3],cornerSix[2],cornerFive[5],cornerSix[4],cornerFive[7],cornerSix[6],depth+1,vertices);
+        drawSponge(cornerSeven[1],cornerEight[0],cornerSeven[3],cornerEight[2],cornerSeven[5],cornerEight[4],cornerSeven[7],cornerEight[6],depth+1,vertices);
+
+        drawSponge(cornerOne[2],cornerOne[3],cornerThree[0],cornerThree[1],cornerOne[6],cornerOne[7],cornerThree[4],cornerThree[5],depth+1,vertices);
+        drawSponge(cornerTwo[2],cornerTwo[3],cornerFour[0],cornerFour[1],cornerTwo[6],cornerTwo[7],cornerFour[4],cornerFour[5],depth+1,vertices);
+        drawSponge(cornerFive[2],cornerFive[3],cornerSeven[0],cornerSeven[1],cornerFive[6],cornerFive[7],cornerSeven[4],cornerSeven[5],depth+1,vertices);
+        drawSponge(cornerSix[2],cornerSix[3],cornerEight[0],cornerEight[1],cornerSix[6],cornerSix[7],cornerEight[4],cornerEight[5],depth+1,vertices);
+
+        drawSponge(cornerOne[4],cornerOne[5],cornerOne[6],cornerOne[7],cornerFive[0],cornerFive[1],cornerFive[2],cornerFive[3],depth+1,vertices);
+        drawSponge(cornerTwo[4],cornerTwo[5],cornerTwo[6],cornerTwo[7],cornerSix[0],cornerSix[1],cornerSix[2],cornerSix[3],depth+1,vertices);
+        drawSponge(cornerThree[4],cornerThree[5],cornerThree[6],cornerThree[7],cornerSeven[0],cornerSeven[1],cornerSeven[2],cornerSeven[3],depth+1,vertices);
+        drawSponge(cornerFour[4],cornerFour[5],cornerFour[6],cornerFour[7],cornerEight[0],cornerEight[1],cornerEight[2],cornerEight[3],depth+1,vertices);
+    } else {
+        drawSquare(one,two,three,four,color1,vertices);
+        drawSquare(six,five,eight,seven,color2,vertices);
+        drawSquare(five,six,one,two,color3,vertices);
+        drawSquare(eight,seven,four,three,color4,vertices);
+        drawSquare(two,six,four,eight,color5,vertices);
+        drawSquare(five,one,seven,three,color6,vertices);
+    }
+}
+
 void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> top, std::vector<float> bottom, int depth, std::vector<float> &vertices, 
             std::vector<float> f1, std::vector<float> f2, std::vector<float> f3,
             std::vector<float> b1, std::vector<float> b2, std::vector<float> b3) 
@@ -461,6 +571,7 @@ void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
     }
 };
 
+// unconventional way to generate a 3D sierpinski but it works
 void drawST(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {

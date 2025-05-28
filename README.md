@@ -5,13 +5,14 @@ A way to view all of my fractals in one place.
 
 ## About
 
+(Be careful past 4 depth with the Menger Sponge)
 
 ## Requirements
 
 - OpenGL (development libraries)
 - GLFW
 - C++ compiler (e.g., g++)
-- CMake or Make (depending on your build system)
+- CMake
 
 ## How to Run
 

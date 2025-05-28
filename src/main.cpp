@@ -114,7 +114,7 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron"};
+    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge"};
 
     nanogui::ref<nanogui::Window> comboWindow = new nanogui::Window(&screen, "Type");
     comboWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -161,7 +161,7 @@ int main()
     nanogui::Widget *params = new nanogui::Widget(paramsWindow);
     params->setLayout(new nanogui::GroupLayout());
 
-    params->add<nanogui::Label>("Recursive Depth", "sans-bold");
+    params->add<nanogui::Label>("Recursive Depth");
     int guiMaxDepth = initialMaxDepth;
     nanogui::IntBox<int> *depthBox = new nanogui::IntBox<int>(params);
     depthBox->setValue(guiMaxDepth);
@@ -208,6 +208,8 @@ int main()
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+        }else if (type==6){
+            drawSponge(cubeVert1,cubeVert2,cubeVert3,cubeVert4,cubeVert5,cubeVert6,cubeVert7,cubeVert8,0,vertices);
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
