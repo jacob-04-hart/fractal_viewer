@@ -485,6 +485,18 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
+        float zoomStep = camera.mandelbrotZoom * 0.1f;
+        camera.mandelbrotZoom -= 0.5f * zoomStep;
+        if (camera.mandelbrotZoom > 10.0f)
+            camera.mandelbrotZoom = 10.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+        float zoomStep = camera.mandelbrotZoom * 0.1f;
+        camera.mandelbrotZoom += 0.5f * zoomStep;
+        if (camera.mandelbrotZoom > 10.0f)
+            camera.mandelbrotZoom = 10.0f;
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
