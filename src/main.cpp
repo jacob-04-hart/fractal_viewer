@@ -221,6 +221,7 @@ int main()
             drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         } else if (type==1){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -228,6 +229,7 @@ int main()
             drawKT2(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         } else if (type==2){
             drawKT3(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -235,6 +237,7 @@ int main()
             drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         }else if (type==3){
             drawST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -242,6 +245,7 @@ int main()
             drawST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         }else if (type==4){
             drawInverseST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -249,6 +253,7 @@ int main()
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         }else if (type==5){
             drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
@@ -256,10 +261,12 @@ int main()
             drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         }else if (type==6){
             drawSponge(cubeVert1,cubeVert2,cubeVert3,cubeVert4,cubeVert5,cubeVert6,cubeVert7,cubeVert8,0,vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
+            camera.flat = false;
         }else if (type==7){
             vertices = {
                 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -271,6 +278,7 @@ int main()
                 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             readyToDraw2D = true;
             readyToDraw3D = false;
+            camera.flat = true;
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -365,9 +373,10 @@ int main()
         } else if(readyToDraw2D) {
             mandelShader.use();
             mandelShader.setInt("maxItr",200);
-            mandelShader.setVec3("color1", glm::vec3(color1[0], color1[1], color1[2]));
-            mandelShader.setVec3("color2", glm::vec3(color2[0], color2[1], color2[2]));
-            mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
+            //for possible user choice coloring
+            //mandelShader.setVec3("color1", glm::vec3(color1[0], color1[1], color1[2]));
+            //mandelShader.setVec3("color2", glm::vec3(color2[0], color2[1], color2[2]));
+            //mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
 
             float time = glfwGetTime();
             float cycles = 1.0f + time * 0.3f;
@@ -471,8 +480,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {   
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
