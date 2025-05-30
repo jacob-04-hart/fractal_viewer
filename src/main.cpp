@@ -493,16 +493,10 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
-        float zoomStep = camera.mandelbrotZoom * 0.1f;
-        camera.mandelbrotZoom -= 0.5f * zoomStep;
-        if (camera.mandelbrotZoom > 10.0f)
-            camera.mandelbrotZoom = 10.0f;
+        camera.ProcessKeyboard(IN, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
-        float zoomStep = camera.mandelbrotZoom * 0.1f;
-        camera.mandelbrotZoom += 0.5f * zoomStep;
-        if (camera.mandelbrotZoom > 10.0f)
-            camera.mandelbrotZoom = 10.0f;
+        camera.ProcessKeyboard(OUT, deltaTime);
     }
 }
 

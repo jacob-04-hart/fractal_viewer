@@ -10,7 +10,9 @@ enum Camera_Movement {
     UP,
     DOWN,
     LEFT,
-    RIGHT
+    RIGHT,
+    IN,
+    OUT
 };
 
 // Default camera values
@@ -89,23 +91,48 @@ public:
             {
                 mandelbrotOffset.x += mVelocity;
             }
+            if (direction == IN)
+            {
+                float zoomStep = mandelbrotZoom * 0.1f;
+                mandelbrotZoom -= 0.5f * zoomStep;
+            }
+            if (direction == OUT)
+            {
+                float zoomStep = mandelbrotZoom * 0.1f;
+                mandelbrotZoom += 0.5f * zoomStep;
+                if (mandelbrotZoom > 10.0f)
+                    mandelbrotZoom = 10.0f;
+            }
         } else {
             float velocity = MovementSpeed * deltaTime;
+            float mVelocity = velocity * (Zoom / 45.0f);
             if (direction == UP)
             {
-                Position += Up * velocity;
+                Position += Up * mVelocity;
             }
             if (direction == DOWN)
             {
-                Position -= Up * velocity;
+                Position -= Up * mVelocity;
             }
             if (direction == LEFT)
             {
-                Position -= Right * velocity;
+                Position -= Right * mVelocity;
             }
             if (direction == RIGHT)
             {
-                Position += Right * velocity;
+                Position += Right * mVelocity;
+            }
+            if (direction == IN)
+            {
+                float zoomStep = Zoom * 0.05f;
+                Zoom -= 1.0f * zoomStep;
+            }
+            if (direction == OUT)
+            {
+                float zoomStep = Zoom * 0.05f;
+                Zoom += 1.0f * zoomStep;
+                if (Zoom > 45.0f)
+                    Zoom = 45.0f;
             }
         }
     }
@@ -141,7 +168,8 @@ public:
             if (mandelbrotZoom > 10.0f)
                 mandelbrotZoom = 10.0f;
         } else {
-            Zoom -= (float)yoffset;
+            float zoomStep = Zoom * 0.1f;
+            Zoom -= (float)yoffset * Zoom;
             if (Zoom < 1.0f)
                 Zoom = 1.0f;
             if (Zoom > 45.0f)
