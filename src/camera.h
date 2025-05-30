@@ -168,10 +168,8 @@ public:
             if (mandelbrotZoom > 10.0f)
                 mandelbrotZoom = 10.0f;
         } else {
-            float zoomStep = Zoom * 0.1f;
+            float zoomStep = Zoom * 0.05f;
             Zoom -= (float)yoffset * Zoom;
-            if (Zoom < 1.0f)
-                Zoom = 1.0f;
             if (Zoom > 45.0f)
                 Zoom = 45.0f;
         }
