@@ -74,6 +74,7 @@ int main()
 #endif
 
     GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "fractal_viewer", NULL, NULL);
+    camera.window = window;
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -482,22 +483,21 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void processInput(GLFWwindow *window)
 {   
+    float cappedDeltaTime = std::min(deltaTime, 0.016f);
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP, deltaTime);
+        camera.ProcessKeyboard(UP, cappedDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(DOWN, deltaTime);
+        camera.ProcessKeyboard(DOWN, cappedDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(LEFT, cappedDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
-        camera.ProcessKeyboard(IN, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
-        camera.ProcessKeyboard(OUT, deltaTime);
-    }
+        camera.ProcessKeyboard(RIGHT, cappedDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        camera.ProcessKeyboard(IN, cappedDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+        camera.ProcessKeyboard(OUT, cappedDeltaTime);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {

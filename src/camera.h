@@ -43,6 +43,7 @@ public:
     float Zoom;
     double mandelbrotZoom = 3.0;
     bool flat = false;
+    GLFWwindow *window;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -74,7 +75,7 @@ public:
     {
         if (flat) {
             float velocity = MovementSpeed * deltaTime;
-            double mVelocity = MovementSpeed * deltaTime * mandelbrotZoom;
+            double mVelocity = MovementSpeed * deltaTime * mandelbrotZoom; //zoom and move less the more you are zoomed
             if (direction == UP)
             {
                 mandelbrotOffset.y += mVelocity;
@@ -102,10 +103,11 @@ public:
                 mandelbrotZoom += 0.5f * zoomStep;
                 if (mandelbrotZoom > 10.0f)
                     mandelbrotZoom = 10.0f;
+                std::cout << "Zoom OUT: " << mandelbrotZoom << " (key state: " << glfwGetKey(window, GLFW_KEY_P) << ")\n";
             }
         } else {
             float velocity = MovementSpeed * deltaTime;
-            float mVelocity = velocity * (Zoom / 45.0f);
+            float mVelocity = velocity * (Zoom / 45.0f); //zoom and move less the more you are zoomed
             if (direction == UP)
             {
                 Position += Up * mVelocity;
