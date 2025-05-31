@@ -64,10 +64,17 @@ nanogui::Screen* g_screen = nullptr;
 int main()
 {   
     glfwInit();
+    puts(glfwGetVersionString());
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
+
+    int major, minor, rev;
+    glfwGetVersion(&major, &minor, &rev);
+    std::cout << "GLFW version: " << major << "." << minor << "." << rev << std::endl;
+    std::cout << "GLFW version string: " << glfwGetVersionString() << std::endl;
+    std::cout << glfwGetVersionString() << std::endl;
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
