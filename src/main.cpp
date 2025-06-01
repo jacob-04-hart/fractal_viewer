@@ -199,11 +199,12 @@ int main()
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
 
-    combo->setCallback([&type, depthBox](int idx){ 
+    combo->setCallback([&type, depthBox, params](int idx){ 
         type = idx;
         if (type==6){
             depthBox->setValue(4);
         }
+        params->setVisible(type != 7);
     });
 
     nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
