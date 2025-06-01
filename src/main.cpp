@@ -196,6 +196,7 @@ int main()
     depthBox->setEditable(true);
     depthBox->setMinValue(0);
     depthBox->setMaxValue(15);
+    depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
 
     combo->setCallback([&type, depthBox](int idx){ 
@@ -514,6 +515,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void char_callback(GLFWwindow* window, unsigned int codepoint) {
+    if (codepoint < '0' || codepoint > '9') {
+        return;
+    }
     if (g_screen && g_screen->charCallbackEvent(codepoint)) {
         return;
     }
