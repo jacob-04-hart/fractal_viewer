@@ -1,5 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -112,8 +114,8 @@ int main()
     screen.performLayout();
 
     Shader ourShader("../src/shader.vs", "../src/shader.fs");
-
     Shader mandelShader("../src/mandelbrot.vs", "../src/mandelbrot.fs");
+    Shader buttonShader("../src/buttonShader.vs","../src/buttonShader.fs");
 
     std::vector<float> vertices;
     unsigned int VBO, VAO;
@@ -313,6 +315,82 @@ int main()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    float buttonVertices[] = {
+        // positions        // texcoords
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 1.0f,
+        0.0f, 0.0f, 0.0f, 1.0f};
+    unsigned int buttonIndices[] = {0, 1, 2, 2, 3, 0};
+
+    unsigned int buttonVAO, buttonVBO, buttonEBO;
+    glGenVertexArrays(1, &buttonVAO);
+    glGenBuffers(1, &buttonVBO);
+    glGenBuffers(1, &buttonEBO);
+
+    glBindVertexArray(buttonVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, buttonVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(buttonVertices), buttonVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buttonEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buttonIndices), buttonIndices, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    // texcoord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+
+    unsigned int texture1, texture2;
+
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char *data = stbi_load("../resources/textures/SirPinski1.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("../resources/textures/SirPinski2.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
@@ -403,6 +481,30 @@ int main()
 
         screen.drawContents();
         screen.drawWidgets();
+
+        glDisable(GL_DEPTH_TEST);
+
+        // Update button vertices for bottom right
+        float buttonWidth = 300.0f, buttonHeight = 300.0f;
+        float x0 = SCR_WIDTH - buttonWidth - 20.0f;
+        float y0 = 20.0f;
+        float x1 = SCR_WIDTH - 20.0f;
+        float y1 = 20.0f + buttonHeight;
+        float buttonVertices[] = {
+            x0, y0, 0.0f, 0.0f,
+            x1, y0, 1.0f, 0.0f,
+            x1, y1, 1.0f, 1.0f,
+            x0, y1, 0.0f, 1.0f};
+        glBindBuffer(GL_ARRAY_BUFFER, buttonVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buttonVertices), buttonVertices);
+
+        glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
+        buttonShader.use();
+        buttonShader.setMat4("projection", ortho);
+
+        glBindVertexArray(buttonVAO);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Restore OpenGL state NanoGUI may have changed
         glEnable(GL_DEPTH_TEST);

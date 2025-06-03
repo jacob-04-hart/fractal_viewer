@@ -103,7 +103,6 @@ public:
                 mandelbrotZoom += 0.5f * zoomStep;
                 if (mandelbrotZoom > 10.0f)
                     mandelbrotZoom = 10.0f;
-                std::cout << "Zoom OUT: " << mandelbrotZoom << " (key state: " << glfwGetKey(window, GLFW_KEY_P) << ")\n";
             }
         } else {
             float velocity = MovementSpeed * deltaTime;
@@ -171,7 +170,7 @@ public:
                 mandelbrotZoom = 10.0f;
         } else {
             float zoomStep = Zoom * 0.05f;
-            Zoom -= (float)yoffset * Zoom;
+            Zoom -= yoffset * zoomStep;
             if (Zoom > 45.0f)
                 Zoom = 45.0f;
         }
