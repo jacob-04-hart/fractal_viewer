@@ -21,6 +21,19 @@
 
 #include "fractal_utils.h"
 
+#include <fstream>
+#include <sstream>
+
+std::string loadTextFile(const std::string& path) {
+    std::ifstream file(path);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+nanogui::Window* g_infoWindow = nullptr;
+bool infoOpen = false;
+
 // settings
 unsigned int SCR_WIDTH = 1500;
 unsigned int SCR_HEIGHT = 1000;
@@ -46,6 +59,14 @@ float preRotX;
 float preRotY;
 
 float totalRotX, totalRotY;
+
+//button position
+float buttonX0 = 0.0f;
+float buttonY0 = 0.0f;
+float buttonX1 = 0.0f;
+float buttonY1 = 0.0f;
+
+bool overMascot = false;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -201,12 +222,35 @@ int main()
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
 
-    combo->setCallback([&type, depthBox, params](int idx){ 
+    nanogui::ref<nanogui::Window> infoWindow = new nanogui::Window(&screen, "Info");
+    infoWindow->setPosition(Eigen::Vector2i(SCR_WIDTH - 350, 10));
+    infoWindow->setLayout(new nanogui::GroupLayout());
+    infoWindow->setFixedWidth(340);
+
+    nanogui::TextBox *infoBox = new nanogui::TextBox(infoWindow);
+    infoBox->setEditable(false);
+    infoBox->setFixedSize(Eigen::Vector2i(320, 40));
+    infoBox->setValue(loadTextFile("../resources/info/type0.txt"));
+    infoWindow->setVisible(false); 
+
+    g_infoWindow = infoWindow.get();
+
+    new nanogui::Widget(infoWindow);
+
+    nanogui::Button *closeButton = new nanogui::Button(infoWindow, "Close");
+    closeButton->setFixedWidth(80);
+    closeButton->setCallback([&infoWindow](){
+        infoWindow->setVisible(false); 
+    });
+
+    combo->setCallback([&type, depthBox, params, infoBox](int idx){ 
         type = idx;
         if (type==6){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
+        std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
+        infoBox->setValue(loadTextFile(filename));
     });
 
     nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
@@ -392,6 +436,8 @@ int main()
     stbi_image_free(data);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     while (!glfwWindowShouldClose(window))
     {   
@@ -407,7 +453,7 @@ int main()
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         if (readyToDraw3D) {
             ourShader.use();
@@ -485,16 +531,21 @@ int main()
         glDisable(GL_DEPTH_TEST);
 
         // Update button vertices for bottom right
-        float buttonWidth = 300.0f, buttonHeight = 300.0f;
+        float buttonWidth = 400.0f, buttonHeight = 400.0f;
         float x0 = SCR_WIDTH - buttonWidth - 20.0f;
         float y0 = 20.0f;
         float x1 = SCR_WIDTH - 20.0f;
         float y1 = 20.0f + buttonHeight;
+        buttonX0 = x0;
+        buttonY0 = y0;
+        buttonX1 = x1;
+        buttonY1 = y1;
         float buttonVertices[] = {
             x0, y0, 0.0f, 0.0f,
             x1, y0, 1.0f, 0.0f,
             x1, y1, 1.0f, 1.0f,
             x0, y1, 0.0f, 1.0f};
+
         glBindBuffer(GL_ARRAY_BUFFER, buttonVBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buttonVertices), buttonVertices);
 
@@ -503,7 +554,8 @@ int main()
         buttonShader.setMat4("projection", ortho);
 
         glBindVertexArray(buttonVAO);
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        if (overMascot) glBindTexture(GL_TEXTURE_2D, texture2);
+        else glBindTexture(GL_TEXTURE_2D, texture1);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Restore OpenGL state NanoGUI may have changed
@@ -531,6 +583,14 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             isFirstDown = false;
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
+            if ((buttonX0 < float(xpos)) && (float(xpos) < buttonX1) &&
+                ((SCR_HEIGHT - buttonY0) > float(ypos)) && (float(ypos) > (SCR_HEIGHT - buttonY1)))
+            {
+                if (g_infoWindow) {
+                    g_infoWindow->setVisible(true);
+                }
+                return;
+            }
             orgX = xpos;
             orgY = ypos;
             rotX = 0;
@@ -581,6 +641,14 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
             rotX = xpos - orgX;
             rotY = ypos - orgY;
         }
+    }
+
+    if ((buttonX0 < float(xpos))&&(float(xpos) < buttonX1)&&((SCR_HEIGHT - buttonY0) > float(ypos))&&(float(ypos) > (SCR_HEIGHT - buttonY1))) {
+        //std::cout << "hovering over button" << std::endl;
+        overMascot = true;
+    } else {
+        //std::cout << "not hovering over button" << std::endl;
+        overMascot = false;
     }
 }  
 
