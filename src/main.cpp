@@ -18,6 +18,7 @@
 #include <nanogui/nanogui.h>
 #include <nanogui/textbox.h>
 #include <nanogui/button.h>
+#include "MultiLineLabel.h"
 
 #include "fractal_utils.h"
 
@@ -227,10 +228,9 @@ int main()
     infoWindow->setLayout(new nanogui::GroupLayout());
     infoWindow->setFixedWidth(340);
 
-    nanogui::TextBox *infoBox = new nanogui::TextBox(infoWindow);
-    infoBox->setEditable(false);
-    infoBox->setFixedSize(Eigen::Vector2i(320, 40));
-    infoBox->setValue(loadTextFile("../resources/info/type0.txt"));
+    MultiLineLabel *infoBox = new MultiLineLabel(infoWindow,loadTextFile("../resources/info/type0.txt"));
+    infoBox->setFixedSize(Eigen::Vector2i(320, 400));
+
     infoWindow->setVisible(false); 
 
     g_infoWindow = infoWindow.get();
