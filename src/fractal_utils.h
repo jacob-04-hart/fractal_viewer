@@ -302,6 +302,61 @@ void drawSquare(std::vector<float> a,std::vector<float> b,std::vector<float> c,s
     vertices.insert(vertices.end(), n.begin(), n.end());
 }
 
+void drawLSponge(std::vector<float> one, float length, int depth, std::vector<float> &vertices)
+{
+    if (depth < maxDepth)
+    {
+        float fourth = length/4;
+        float half = length/2;
+        float threeQ = length * 3 / 4;
+
+        drawLSponge(one, fourth, depth+2, vertices);
+        drawLSponge({one[0]+fourth, one[1], one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+half, one[1], one[2]}, half, depth+1, vertices);
+        drawLSponge({one[0], one[1]-fourth, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0], one[1]-half, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-half, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0], one[1]-threeQ, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+fourth, one[1]-threeQ, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+half, one[1]-threeQ, one[2]}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-threeQ, one[2]}, fourth, depth+2, vertices);
+
+        drawLSponge({one[0], one[1], one[2]+fourth}, fourth, depth+2, vertices);
+        drawLSponge({one[0], one[1]-threeQ, one[2]+fourth}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-threeQ, one[2]+fourth}, fourth, depth+2, vertices);
+
+        drawLSponge({one[0], one[1], one[2]+half}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1], one[2]+half}, fourth, depth+2, vertices);
+        drawLSponge({one[0], one[1]-half, one[2]+half}, half, depth+1, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-threeQ, one[2]+half}, fourth, depth+2, vertices);
+
+        drawLSponge({one[0], one[1], one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+fourth, one[1], one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0], one[1]-fourth, one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+half, one[1], one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1], one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-fourth, one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-half, one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+half, one[1]-threeQ, one[2]+threeQ}, fourth, depth+2, vertices);
+        drawLSponge({one[0]+threeQ, one[1]-threeQ, one[2]+threeQ}, fourth, depth+2, vertices);
+    } else {
+        std::vector<float> two = {one[0]+length, one[1], one[2]};
+        std::vector<float> three = {one[0], one[1]-length, one[2]};
+        std::vector<float> four = {one[0]+length, one[1]-length, one[2]};
+        std::vector<float> five = {one[0], one[1], one[2]+length};
+        std::vector<float> six = {one[0]+length, one[1], one[2]+length};
+        std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
+        std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
+
+        drawSquare(one,two,three,four,color1,vertices);
+        drawSquare(six,five,eight,seven,color2,vertices);
+        drawSquare(five,six,one,two,color3,vertices);
+        drawSquare(eight,seven,four,three,color4,vertices);
+        drawSquare(two,six,four,eight,color5,vertices);
+        drawSquare(five,one,seven,three,color6,vertices);
+    }
+}
+
 void drawSponge(std::vector<float> one, std::vector<float> two, std::vector<float> three, std::vector<float> four, 
             std::vector<float> five, std::vector<float> six, std::vector<float> seven, std::vector<float> eight, int depth, std::vector<float> &vertices)
 {

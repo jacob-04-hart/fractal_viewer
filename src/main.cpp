@@ -149,7 +149,7 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge", "Mandelbrot"};
+    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -245,7 +245,7 @@ int main()
 
     combo->setCallback([&type, depthBox, params, infoBox](int idx){ 
         type = idx;
-        if (type==6){
+        if (type==6||type==8){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
@@ -335,6 +335,11 @@ int main()
             readyToDraw2D = true;
             readyToDraw3D = false;
             camera.flat = true;
+        }else if (type==8){
+            drawLSponge(cubeVert1,1,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
