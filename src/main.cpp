@@ -272,6 +272,10 @@ int main()
         color3 = {c3.r(), c3.g(), c3.b()};
         nanogui::Color c4 = colorWheel4->color();
         color4 = {c4.r(), c4.g(), c4.b()};
+        nanogui::Color c5 = colorWheel5->color();
+        color5 = {c5.r(), c5.g(), c5.b()};
+        nanogui::Color c6 = colorWheel6->color();
+        color6 = {c6.r(), c6.g(), c6.b()};
         vertices.clear();
         if (type==0){
             drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
@@ -337,6 +341,7 @@ int main()
             camera.flat = true;
         }else if (type==8){
             drawLSponge(cubeVert1,1,0,vertices);
+            //drawLSpongeV2(cubeVert1,1,0,vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
