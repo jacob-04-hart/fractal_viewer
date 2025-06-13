@@ -39,8 +39,8 @@ const std::vector<float> eqTVertex1 = {1.0f,0.0f,0.0f};
 const std::vector<float> eqTVertex2 = {-.5f,-(sqrt3/2.0f),0.0f};
 const std::vector<float> eqTVertex3 = {-.5f,sqrt3/2.0f,0.0f};
 
-const std::vector<float> D4Top = {0.0f,0.0f,-.4f};
-const std::vector<float> D4Bottom = {0.0f,0.0f,.4f};
+const std::vector<float> D4Top = {0.0f,0.0f,-.5f};
+const std::vector<float> D4Bottom = {0.0f,0.0f,.5f};
 
 // cube vertices
 const std::vector<float> cubeVert1 = {-.5f,.5f,-.5f};
