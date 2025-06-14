@@ -39,8 +39,8 @@ const std::vector<float> eqTVertex1 = {1.0f,0.0f,0.0f};
 const std::vector<float> eqTVertex2 = {-.5f,-(sqrt3/2.0f),0.0f};
 const std::vector<float> eqTVertex3 = {-.5f,sqrt3/2.0f,0.0f};
 
-const std::vector<float> D4Top = {0.0f,0.0f,-.5f};
-const std::vector<float> D4Bottom = {0.0f,0.0f,.5f};
+std::vector<float> d4Top = {0.0f,0.0f,-.5f};
+std::vector<float> d4Bottom = {0.0f,0.0f,.5f};
 
 // cube vertices
 const std::vector<float> cubeVert1 = {-.5f,.5f,-.5f};
@@ -144,13 +144,13 @@ const std::vector<float> normal2 = normal(f2vertex1, f2vertex2, f2vertex3);
 const std::vector<float> normal3 = normal(f3vertex1, f3vertex2, f3vertex3);
 const std::vector<float> normal4 = normal(f4vertex1, f4vertex2, f4vertex3);
 
-const std::vector<float> d4TopNormal1 = normal(D4Top,eqTVertex1,eqTVertex2);
-const std::vector<float> d4TopNormal2 = normal(D4Top,eqTVertex2,eqTVertex3);
-const std::vector<float> d4TopNormal3 = normal(D4Top,eqTVertex3,eqTVertex1);
+const std::vector<float> d4TopNormal1 = normal(d4Top,eqTVertex1,eqTVertex2);
+const std::vector<float> d4TopNormal2 = normal(d4Top,eqTVertex2,eqTVertex3);
+const std::vector<float> d4TopNormal3 = normal(d4Top,eqTVertex3,eqTVertex1);
 
-const std::vector<float> d4BottomNormal1 = normal(D4Bottom,eqTVertex2,eqTVertex1);
-const std::vector<float> d4BottomNormal2 = normal(D4Bottom,eqTVertex3,eqTVertex2);
-const std::vector<float> d4BottomNormal3 = normal(D4Bottom,eqTVertex1,eqTVertex3);
+const std::vector<float> d4BottomNormal1 = normal(d4Bottom,eqTVertex2,eqTVertex1);
+const std::vector<float> d4BottomNormal2 = normal(d4Bottom,eqTVertex3,eqTVertex2);
+const std::vector<float> d4BottomNormal3 = normal(d4Bottom,eqTVertex1,eqTVertex3);
 
 void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> &vertices)
 {

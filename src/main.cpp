@@ -203,7 +203,7 @@ int main()
 
     colors->setActiveTab(0);
 
-    new nanogui::Label(mainWindow, "Parameters");
+    new nanogui::Label(mainWindow, "3D Parameters");
     nanogui::Widget *params = new nanogui::Widget(mainWindow);
     params->setLayout(new nanogui::GroupLayout());
     params->setFixedWidth(260);
@@ -222,6 +222,22 @@ int main()
     depthBox->setMaxValue(15);
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
+
+    new nanogui::Label(mainWindow, "Fractal-Specific");
+
+    //parameter for split koch thickness
+    nanogui::Widget *splitKochParams = new nanogui::Widget(mainWindow);
+    splitKochParams->setLayout(new nanogui::GroupLayout());
+    splitKochParams->setFixedWidth(260);
+    splitKochParams->add<nanogui::Label>("Thickness (0-1)");
+
+    nanogui::FloatBox<float> *thicknessBox = new nanogui::FloatBox<float>(splitKochParams);
+    thicknessBox->setValue(1.0f);
+    thicknessBox->setEditable(true);
+    thicknessBox->setMinValue(0);
+    thicknessBox->setMaxValue(1);
+    thicknessBox->setFormat("0(\\.[0-9]*)?|1(\\.0*)?");
+    thicknessBox->setFixedWidth(60);
 
     nanogui::ref<nanogui::Window> infoWindow = new nanogui::Window(&screen, "Info");
     infoWindow->setPosition(Eigen::Vector2i(SCR_WIDTH - 350, 10));
@@ -243,12 +259,13 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, depthBox, params, infoBox](int idx){ 
+    combo->setCallback([&type, depthBox, params, infoBox, splitKochParams](int idx){ 
         type = idx;
         if (type==6||type==8){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
+        splitKochParams->setVisible(type == 0);
         std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
         infoBox->setValue(loadTextFile(filename));
     });
@@ -278,7 +295,9 @@ int main()
         color6 = {c6.r(), c6.g(), c6.b()};
         vertices.clear();
         if (type==0){
-            drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,D4Top,D4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
+            d4Top.at(2) = -(thicknessBox->value()/2);
+            d4Bottom.at(2) = thicknessBox->value()/2;
+            drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,d4Top,d4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
@@ -696,7 +715,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void char_callback(GLFWwindow* window, unsigned int codepoint) {
-    if (codepoint < '0' || codepoint > '9') {
+    if (!((codepoint >= '0' && codepoint <= '9') || codepoint == '.')) {
         return;
     }
     if (g_screen && g_screen->charCallbackEvent(codepoint)) {
