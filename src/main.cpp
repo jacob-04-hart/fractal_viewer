@@ -149,7 +149,9 @@ int main()
 
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge"};
+    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
+                                            "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: Tetrahedron",
+                                            "Build Your Own: 3x3 Cube"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -223,10 +225,14 @@ int main()
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
 
-    new nanogui::Label(mainWindow, "Fractal-Specific");
+    // window for type 1 specific params
+    nanogui::ref<nanogui::Window> type1Window = new nanogui::Window(&screen, "Split Koch Parameters");
+    type1Window->setPosition(Eigen::Vector2i(10, 500));
+    type1Window->setLayout(new nanogui::GroupLayout());
+    type1Window->setSize(Eigen::Vector2i(270, 1000));
 
     //parameter for split koch thickness
-    nanogui::Widget *splitKochParams = new nanogui::Widget(mainWindow);
+    nanogui::Widget *splitKochParams = new nanogui::Widget(type1Window);
     splitKochParams->setLayout(new nanogui::GroupLayout());
     splitKochParams->setFixedWidth(260);
     splitKochParams->add<nanogui::Label>("Thickness (0-1)");
@@ -238,6 +244,155 @@ int main()
     thicknessBox->setMaxValue(1);
     thicknessBox->setFormat("0(\\.[0-9]*)?|1(\\.0*)?");
     thicknessBox->setFixedWidth(60);
+
+    // window for type 9 specific parameters
+    nanogui::ref<nanogui::Window> type9Window = new nanogui::Window(&screen, "L-Sponge Parameters");
+    type9Window->setPosition(Eigen::Vector2i(10, 500));
+    type9Window->setLayout(new nanogui::GroupLayout());
+    type9Window->setSize(Eigen::Vector2i(270, 1000));
+    type9Window->setVisible(false);
+
+    nanogui::Widget *lSpongeParams = new nanogui::Widget(type9Window);
+    lSpongeParams->setLayout(new nanogui::GroupLayout());
+    lSpongeParams->setFixedWidth(260);
+    //lSpongeParams->add<nanogui::Label>("Experimental Recursive Sizing");
+
+    nanogui::CheckBox *experimentalBox = new nanogui::CheckBox(lSpongeParams, "Experimental Recursive Sizing");
+    experimentalBox->setChecked(false);
+    
+    // modular tet params
+    nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. Tetrahedron Controls");
+    type10Window->setPosition(Eigen::Vector2i(10, 500));
+    type10Window->setLayout(new nanogui::GroupLayout());
+    type10Window->setSize(Eigen::Vector2i(270, 1000));
+    type10Window->setVisible(false);
+
+    nanogui::Widget *modularTetParams = new nanogui::Widget(type10Window);
+    modularTetParams->setLayout(new nanogui::GroupLayout());
+    modularTetParams->setFixedWidth(260);
+    
+    modularTetParams->add<nanogui::Label>("Choose which sections to draw:");
+    nanogui::CheckBox *drawTetABox = new nanogui::CheckBox(modularTetParams, "Tetrahedron A");
+    drawTetABox->setChecked(true);
+    nanogui::CheckBox *drawTetBBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron B");
+    drawTetBBox->setChecked(true);
+    nanogui::CheckBox *drawTetCBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron C");
+    drawTetCBox->setChecked(true);
+    nanogui::CheckBox *drawTetDBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron D");
+    drawTetDBox->setChecked(true);
+    nanogui::CheckBox *drawOctaBox = new nanogui::CheckBox(modularTetParams, "Center Octahedron");
+    drawOctaBox->setChecked(true);
+    
+    modularTetParams->add<nanogui::Label>("Choose which sections to include:");
+    nanogui::CheckBox *incTetABox = new nanogui::CheckBox(modularTetParams, "Tetrahedron A");
+    incTetABox->setChecked(true);
+    nanogui::CheckBox *incTetBBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron B");
+    incTetBBox->setChecked(true);
+    nanogui::CheckBox *incTetCBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron C");
+    incTetCBox->setChecked(true);
+    nanogui::CheckBox *incTetDBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron D");
+    incTetDBox->setChecked(true);
+
+    modularTetParams->add<nanogui::Label>("For more information, click on Sir Pinski.");
+    
+    // modular 3x3 cube params
+    nanogui::ref<nanogui::Window> type11Window1 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Draw");
+    type11Window1->setPosition(Eigen::Vector2i(330, 10));
+    type11Window1->setLayout(new nanogui::GroupLayout());
+    type11Window1->setSize(Eigen::Vector2i(200, 1000));
+    type11Window1->setVisible(false);
+
+    nanogui::Widget *modular3x3CubeParams1 = new nanogui::Widget(type11Window1);
+    modular3x3CubeParams1->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,3));
+    modular3x3CubeParams1->setFixedWidth(260);
+    
+    modular3x3CubeParams1->add<nanogui::Label>("Layer 1");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer1Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer1Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
+            layer1Buttons1[row][col]->setFlags(1 << 2);
+        }
+    }
+
+    modular3x3CubeParams1->add<nanogui::Label>("Layer 2");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer2Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer2Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
+            layer2Buttons1[row][col]->setFlags(1 << 2);
+        }
+    }
+
+    modular3x3CubeParams1->add<nanogui::Label>("Layer 3");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    modular3x3CubeParams1->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer3Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer3Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
+            layer3Buttons1[row][col]->setFlags(1 << 2);
+        }
+    }
+
+    nanogui::ref<nanogui::Window> type11Window2 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
+    type11Window2->setPosition(Eigen::Vector2i(330, 10));
+    type11Window2->setLayout(new nanogui::GroupLayout());
+    type11Window2->setSize(Eigen::Vector2i(200, 1000));
+    type11Window2->setVisible(false);
+
+    nanogui::Widget *modular3x3CubeParams2 = new nanogui::Widget(type11Window2);
+    modular3x3CubeParams2->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,3));
+    modular3x3CubeParams2->setFixedWidth(260);
+    
+    modular3x3CubeParams2->add<nanogui::Label>("Layer 1");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer1Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer1Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
+            layer1Buttons2[row][col]->setFlags(1 << 2);
+        }
+    }
+
+    modular3x3CubeParams2->add<nanogui::Label>("Layer 2");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer2Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer2Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
+            layer2Buttons2[row][col]->setFlags(1 << 2);
+        }
+    }
+
+    modular3x3CubeParams2->add<nanogui::Label>("Layer 3");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    modular3x3CubeParams2->add<nanogui::Label>("");
+    std::vector<std::vector<nanogui::Button *>> layer3Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
+    for (int row = 0; row < 3; ++row)
+    {
+        for (int col = 0; col < 3; ++col)
+        {
+            layer3Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
+            layer3Buttons2[row][col]->setFlags(1 << 2);
+        }
+    }
 
     nanogui::ref<nanogui::Window> infoWindow = new nanogui::Window(&screen, "Info");
     infoWindow->setPosition(Eigen::Vector2i(SCR_WIDTH - 350, 10));
@@ -259,13 +414,17 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, depthBox, params, infoBox, splitKochParams](int idx){ 
+    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window1, &type11Window2](int idx){ 
         type = idx;
         if (type==6||type==8){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
-        splitKochParams->setVisible(type == 0);
+        type1Window->setVisible(type == 0);
+        type9Window->setVisible(type == 8);
+        type10Window->setVisible(type == 9);
+        type11Window1->setVisible(type == 10);
+        type11Window2->setVisible(type == 10);
         std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
         infoBox->setValue(loadTextFile(filename));
     });
@@ -359,8 +518,22 @@ int main()
             readyToDraw3D = false;
             camera.flat = true;
         }else if (type==8){
-            drawLSponge(cubeVert1,1,0,vertices);
-            //drawLSpongeV2(cubeVert1,1,0,vertices);
+            if (!experimentalBox->checked()) drawLSponge(cubeVert1,1,0,vertices);
+            else drawLSpongeV2(cubeVert1,1,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
+        }else if (type==9){
+            drawTet1 = drawTetABox->checked();
+            drawTet2 = drawTetBBox->checked();
+            drawTet3 = drawTetCBox->checked();
+            drawTet4 = drawTetDBox->checked();
+            drawOcta = drawOctaBox->checked();
+            incTet1 = incTetABox->checked();
+            incTet2 = incTetBBox->checked();
+            incTet3 = incTetCBox->checked();
+            incTet4 = incTetDBox->checked();
+            drawModularTetrahedron(tetA,tetB,tetC,tetD,0,vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;

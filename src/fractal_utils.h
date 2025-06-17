@@ -13,6 +13,12 @@ std::vector<float> color6 = {0.5f, 0.0f, 0.5f}; // purple
 
 unsigned int maxDepth = 6; // change this to either save or set fire to your computer
 
+// tetrahedron vertices
+const std::vector<float> tetA = {-.5f,.5f,-.5f};
+const std::vector<float> tetB = {-.5f,-.5f,.5f};
+const std::vector<float> tetC = {.5f,-.5f,-.5f};
+const std::vector<float> tetD = {.5f,.5f,.5f};
+
 // Face 1 (tetrahedron)
 const std::vector<float> f1vertex1 = {.5f, .5f, .5f};
 const std::vector<float> f1vertex2 = {-.5f, -.5f, .5f};
@@ -172,6 +178,18 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
     }
 
     const std::vector<float> &color = faceColors[bestFace];
+    vertices.insert(vertices.end(), a.begin(), a.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), b.begin(), b.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+    vertices.insert(vertices.end(), c.begin(), c.end());
+    vertices.insert(vertices.end(), color.begin(), color.end());
+    vertices.insert(vertices.end(), n.begin(), n.end());
+}
+void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> &vertices, std::vector<float> color){
+    const std::vector<float> n = unnormalizedNormal(a,c,b);
     vertices.insert(vertices.end(), a.begin(), a.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
     vertices.insert(vertices.end(), n.begin(), n.end());
@@ -473,6 +491,89 @@ void drawSponge(std::vector<float> one, std::vector<float> two, std::vector<floa
         drawSquare(eight,seven,four,three,color4,vertices);
         drawSquare(two,six,four,eight,color5,vertices);
         drawSquare(five,one,seven,three,color6,vertices);
+    }
+}
+
+bool drawTet1 = true;
+bool drawTet2 = true;
+bool drawTet3 = true;
+bool drawTet4 = true;
+bool drawOcta = true;
+
+bool incTet1 = true;
+bool incTet2 = true;
+bool incTet3 = true;
+bool incTet4 = true;
+
+void drawModularTetrahedron(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> d, int depth, std::vector<float> &vertices) {
+    std::vector<float> point1 = a;
+    std::vector<float> point2 = midpoint(a, b);
+    std::vector<float> point3 = midpoint(a, c);
+    std::vector<float> point4 = midpoint(a, d);
+    std::vector<float> point5 = b;
+    std::vector<float> point6 = midpoint(b, c);
+    std::vector<float> point7 = c;
+    std::vector<float> point8 = midpoint(b, d);
+    std::vector<float> point9 = midpoint(c, d);
+    std::vector<float> point10 = d;
+    if (depth < (maxDepth -1)) {
+        if (incTet1){
+            drawModularTetrahedron(point1,point2,point3,point4,depth+1,vertices);
+        }
+        if (incTet2){
+            drawModularTetrahedron(point2,point5,point6,point8,depth+1,vertices);
+        }
+        if (incTet3){
+            drawModularTetrahedron(point3,point6,point7,point9,depth+1,vertices);
+        }
+        if (incTet4){
+            drawModularTetrahedron(point4,point8,point9,point10,depth+1,vertices);
+        }
+        if (drawOcta){
+            drawTriangle(point2,point6,point3,vertices,color1);
+            drawTriangle(point4,point9,point8,vertices,color1);
+            drawTriangle(point4,point8,point2,vertices,color2);
+            drawTriangle(point3,point6,point9,vertices,color2);
+            drawTriangle(point3,point9,point4,vertices,color3);
+            drawTriangle(point2,point8,point6,vertices,color3);
+            drawTriangle(point4,point2,point3,vertices,color4);
+            drawTriangle(point6,point8,point9,vertices,color4);
+        }
+    } else {
+        if (drawTet1) {
+            drawTriangle(point1,point2,point3,vertices,color1);
+            drawTriangle(point1,point4,point2,vertices,color2);
+            drawTriangle(point1,point3,point4,vertices,color3);
+            drawTriangle(point2,point4,point3,vertices,color4);
+        }
+        if (drawTet2) {
+            drawTriangle(point2,point5,point6,vertices,color1);
+            drawTriangle(point2,point8,point5,vertices,color2);
+            drawTriangle(point2,point6,point8,vertices,color3);
+            drawTriangle(point5,point8,point6,vertices,color4);
+        }
+        if (drawTet3) {
+            drawTriangle(point3,point6,point7,vertices,color1);
+            drawTriangle(point3,point9,point6,vertices,color2);
+            drawTriangle(point3,point7,point9,vertices,color3);
+            drawTriangle(point6,point9,point7,vertices,color4);
+        }
+        if (drawTet4) {
+            drawTriangle(point4,point8,point9,vertices,color1);
+            drawTriangle(point4,point10,point8,vertices,color2);
+            drawTriangle(point4,point9,point10,vertices,color3);
+            drawTriangle(point8,point10,point9,vertices,color4);
+        }
+        if (drawOcta){
+            drawTriangle(point2,point6,point3,vertices,color1);
+            drawTriangle(point4,point9,point8,vertices,color1);
+            drawTriangle(point4,point8,point2,vertices,color2);
+            drawTriangle(point3,point6,point9,vertices,color2);
+            drawTriangle(point3,point9,point4,vertices,color3);
+            drawTriangle(point2,point8,point6,vertices,color3);
+            drawTriangle(point4,point2,point3,vertices,color4);
+            drawTriangle(point6,point8,point9,vertices,color4);
+        }
     }
 }
 
