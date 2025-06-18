@@ -426,6 +426,7 @@ void drawModular3x3Cube(std::vector<float> one, float length, int depth, std::ve
         // drawSquare(five,one,seven,three,color6,vertices);
     }
 }
+
 std::vector<std::vector<std::vector<bool>>> layerInc(4, std::vector<std::vector<bool>>(4, std::vector<bool>(4, true)));
 void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
     float fourth = length/4;
@@ -439,7 +440,7 @@ void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::ve
                 {
                     if (layerInc[layer][row][col])
                     {
-                        drawModular4x4Cube({one[0] + (fourth * row), one[1] - (fourth * col), z}, length / 3, depth + 1, vertices);
+                        drawModular4x4Cube({one[0] + (fourth * row), one[1] - (fourth * col), z}, fourth, depth + 1, vertices);
                     }
                 }
             }

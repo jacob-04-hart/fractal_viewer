@@ -151,7 +151,7 @@ int main()
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
                                             "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: Tetrahedron",
-                                            "Build Your Own: 3x3 Cube"};
+                                            "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -225,9 +225,18 @@ int main()
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
 
+    nanogui::Widget *perspectiveBoxContainer = new nanogui::Widget(params);
+    perspectiveBoxContainer->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal,
+                                                        nanogui::Alignment::Middle, 0, 0));
+    
+    nanogui::CheckBox *perspectiveBox = new nanogui::CheckBox(params, "Orthographic");
+    perspectiveBox->setChecked(false);
+
+    bool ortho = false;
+
     // window for type 1 specific params
     nanogui::ref<nanogui::Window> type1Window = new nanogui::Window(&screen, "Split Koch Parameters");
-    type1Window->setPosition(Eigen::Vector2i(10, 500));
+    type1Window->setPosition(Eigen::Vector2i(10, 520));
     type1Window->setLayout(new nanogui::GroupLayout());
     type1Window->setSize(Eigen::Vector2i(270, 1000));
 
@@ -247,7 +256,7 @@ int main()
 
     // window for type 9 specific parameters
     nanogui::ref<nanogui::Window> type9Window = new nanogui::Window(&screen, "L-Sponge Parameters");
-    type9Window->setPosition(Eigen::Vector2i(10, 500));
+    type9Window->setPosition(Eigen::Vector2i(10, 520));
     type9Window->setLayout(new nanogui::GroupLayout());
     type9Window->setSize(Eigen::Vector2i(270, 1000));
     type9Window->setVisible(false);
@@ -262,7 +271,7 @@ int main()
     
     // modular tet params
     nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. Tetrahedron Controls");
-    type10Window->setPosition(Eigen::Vector2i(10, 500));
+    type10Window->setPosition(Eigen::Vector2i(10, 520));
     type10Window->setLayout(new nanogui::GroupLayout());
     type10Window->setSize(Eigen::Vector2i(270, 1000));
     type10Window->setVisible(false);
@@ -394,6 +403,37 @@ int main()
         }
     }
 
+    //4x4 cube
+    nanogui::ref<nanogui::Window> type12Window = new nanogui::Window(&screen, "B.Y.O. 4x4 Cube Controls: Include");
+    type12Window->setPosition(Eigen::Vector2i(330, 10));
+    type12Window->setLayout(new nanogui::GroupLayout());
+    type12Window->setSize(Eigen::Vector2i(200, 1000));
+    type12Window->setVisible(false);
+
+    nanogui::Widget *modular4x4CubeParams = new nanogui::Widget(type12Window);
+    modular4x4CubeParams->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,4));
+    modular4x4CubeParams->setFixedWidth(300);
+
+    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons(4, std::vector<std::vector<nanogui::Button *>>(4, std::vector<nanogui::Button *>(4, nullptr)));
+    for (int layer = 0; layer < 4; ++layer)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                if (row==0&&col==0){
+                    modular4x4CubeParams->add<nanogui::Label>("Layer "+std::to_string(layer+1));
+                    modular4x4CubeParams->add<nanogui::Label>("");
+                    modular4x4CubeParams->add<nanogui::Label>("");
+                    modular4x4CubeParams->add<nanogui::Label>("");
+                }
+                cubeButtons[layer][row][col] = new nanogui::Button(modular4x4CubeParams, "  ");
+                cubeButtons[layer][row][col]->setFlags(1 << 2);
+                cubeButtons[layer][row][col]->setPushed(true);
+            }
+        }
+    }
+
     nanogui::ref<nanogui::Window> infoWindow = new nanogui::Window(&screen, "Info");
     infoWindow->setPosition(Eigen::Vector2i(SCR_WIDTH - 350, 10));
     infoWindow->setLayout(new nanogui::GroupLayout());
@@ -414,9 +454,9 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window1, &type11Window2](int idx){ 
+    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window1, &type11Window2, &type12Window](int idx){ 
         type = idx;
-        if (type==6||type==8||type==10){
+        if (type==6||type==8||type==10||type==11){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
@@ -425,6 +465,7 @@ int main()
         type10Window->setVisible(type == 9);
         type11Window1->setVisible(type == 10);
         type11Window2->setVisible(type == 10);
+        type12Window->setVisible(type == 11);
         std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
         infoBox->setValue(loadTextFile(filename));
     });
@@ -452,6 +493,7 @@ int main()
         color5 = {c5.r(), c5.g(), c5.b()};
         nanogui::Color c6 = colorWheel6->color();
         color6 = {c6.r(), c6.g(), c6.b()};
+        ortho = perspectiveBox->checked();
         vertices.clear();
         if (type==0){
             d4Top.at(2) = -(thicknessBox->value()/2);
@@ -586,6 +628,21 @@ int main()
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
+        }else if (type==11){
+            for (int layer = 0; layer < 4; ++layer)
+            {
+                for (int row = 0; row < 4; ++row)
+                {
+                    for (int col = 0; col < 4; ++col)
+                    {
+                        layerInc[layer][row][col] = !(cubeButtons[layer][row][col]->pushed());
+                    }
+                }
+            }
+            drawModular4x4Cube(cubeVert1,1,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
         };
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -712,8 +769,15 @@ int main()
             ourShader.setVec3("lightPos", lightPos);
             ourShader.setVec3("viewPos", camera.Position); 
 
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-            ourShader.setMat4("projection", projection);
+            if (ortho){
+                float orthoSize = 1.0f;
+                float aspect = (float)SCR_WIDTH / (float)SCR_HEIGHT;
+                glm::mat4 projection = glm::ortho(-orthoSize * aspect, orthoSize * aspect, -orthoSize, orthoSize, 0.1f, 100.0f);
+                ourShader.setMat4("projection", projection);
+            } else {
+                glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+                ourShader.setMat4("projection", projection);
+            }
 
             glm::mat4 view = camera.GetViewMatrix();
             ourShader.setMat4("view", view);
