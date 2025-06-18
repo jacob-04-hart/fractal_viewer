@@ -297,7 +297,7 @@ int main()
     
     // modular 3x3 cube params
     nanogui::ref<nanogui::Window> type11Window1 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Draw");
-    type11Window1->setPosition(Eigen::Vector2i(330, 10));
+    type11Window1->setPosition(Eigen::Vector2i(10, 620));
     type11Window1->setLayout(new nanogui::GroupLayout());
     type11Window1->setSize(Eigen::Vector2i(200, 1000));
     type11Window1->setVisible(false);
@@ -346,7 +346,7 @@ int main()
     }
 
     nanogui::ref<nanogui::Window> type11Window2 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
-    type11Window2->setPosition(Eigen::Vector2i(330, 10));
+    type11Window2->setPosition(Eigen::Vector2i(310, 620));
     type11Window2->setLayout(new nanogui::GroupLayout());
     type11Window2->setSize(Eigen::Vector2i(200, 1000));
     type11Window2->setVisible(false);
@@ -416,7 +416,7 @@ int main()
 
     combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window1, &type11Window2](int idx){ 
         type = idx;
-        if (type==6||type==8){
+        if (type==6||type==8||type==10){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
@@ -534,6 +534,55 @@ int main()
             incTet3 = incTetCBox->checked();
             incTet4 = incTetDBox->checked();
             drawModularTetrahedron(tetA,tetB,tetC,tetD,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
+        }else if (type==10){ // takes up way more lines than needed but i'm too lazy
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer1Draw[row][col] = !(layer1Buttons1[row][col]->pushed());
+                }
+            }
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer2Draw[row][col] = !(layer2Buttons1[row][col]->pushed());
+                }
+            }
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer3Draw[row][col] = !(layer3Buttons1[row][col]->pushed());
+                }
+            }
+
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer1Inc[row][col] = !(layer1Buttons2[row][col]->pushed());
+                }
+            }
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer2Inc[row][col] = !(layer2Buttons2[row][col]->pushed());
+                }
+            }
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    layer3Inc[row][col] = !(layer3Buttons2[row][col]->pushed());
+                }
+            }
+            drawModular3x3Cube(cubeVert1,1,0,vertices);
+
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
