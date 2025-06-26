@@ -768,11 +768,11 @@ int main()
                 }
                 else
                 {
-                    totalRotX = preRotX + rotX;
-                    totalRotY = preRotY + rotY;
+                    totalRotX = preRotX + rotX*(camera.Zoom/90.0f);
+                    totalRotY = preRotY + rotY*(camera.Zoom/90.0f);
                 }
-                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY*(camera.Zoom/90.0f)), glm::vec3(1.0f, 0.0f, 0.0f));
-                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX*(camera.Zoom/90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                 ourShader.setMat4("model", rotatedModel);
@@ -914,8 +914,9 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
             rotY = 0;
             justStartedDragging = false;
         } else {
-            rotX = xpos - orgX;
-            rotY = ypos - orgY;
+            float sensitivity = 0.2f;
+            rotX = (xpos - orgX) * sensitivity;
+            rotY = (ypos - orgY) * sensitivity;
         }
     }
 
