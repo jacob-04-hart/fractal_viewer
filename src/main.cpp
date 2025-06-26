@@ -151,7 +151,7 @@ int main()
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
                                             "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: Tetrahedron",
-                                            "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube"};
+                                            "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -305,101 +305,33 @@ int main()
     modularTetParams->add<nanogui::Label>("For more information, click on Sir Pinski.");
     
     // modular 3x3 cube params
-    nanogui::ref<nanogui::Window> type11Window1 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Draw");
-    type11Window1->setPosition(Eigen::Vector2i(10, 620));
-    type11Window1->setLayout(new nanogui::GroupLayout());
-    type11Window1->setSize(Eigen::Vector2i(200, 1000));
-    type11Window1->setVisible(false);
 
-    nanogui::Widget *modular3x3CubeParams1 = new nanogui::Widget(type11Window1);
-    modular3x3CubeParams1->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,3));
-    modular3x3CubeParams1->setFixedWidth(260);
+    nanogui::ref<nanogui::Window> type11Window = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
+    type11Window->setPosition(Eigen::Vector2i(10, 520));
+    type11Window->setLayout(new nanogui::GroupLayout());
+    type11Window->setSize(Eigen::Vector2i(200, 1000));
+    type11Window->setVisible(false);
+
+    nanogui::Widget *modular3x3CubeParams = new nanogui::Widget(type11Window);
+    modular3x3CubeParams->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,3));
+    modular3x3CubeParams->setFixedWidth(260);
     
-    modular3x3CubeParams1->add<nanogui::Label>("Layer 1");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer1Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
+    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons3(3, std::vector<std::vector<nanogui::Button *>>(3, std::vector<nanogui::Button *>(3, nullptr)));
+    for (int layer = 0; layer < 3; ++layer)
     {
-        for (int col = 0; col < 3; ++col)
+        for (int row = 0; row < 3; ++row)
         {
-            layer1Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
-            layer1Buttons1[row][col]->setFlags(1 << 2);
-        }
-    }
-
-    modular3x3CubeParams1->add<nanogui::Label>("Layer 2");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer2Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
-    {
-        for (int col = 0; col < 3; ++col)
-        {
-            layer2Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
-            layer2Buttons1[row][col]->setFlags(1 << 2);
-        }
-    }
-
-    modular3x3CubeParams1->add<nanogui::Label>("Layer 3");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    modular3x3CubeParams1->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer3Buttons1(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
-    {
-        for (int col = 0; col < 3; ++col)
-        {
-            layer3Buttons1[row][col] = new nanogui::Button(modular3x3CubeParams1,"  ");
-            layer3Buttons1[row][col]->setFlags(1 << 2);
-        }
-    }
-
-    nanogui::ref<nanogui::Window> type11Window2 = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
-    type11Window2->setPosition(Eigen::Vector2i(310, 620));
-    type11Window2->setLayout(new nanogui::GroupLayout());
-    type11Window2->setSize(Eigen::Vector2i(200, 1000));
-    type11Window2->setVisible(false);
-
-    nanogui::Widget *modular3x3CubeParams2 = new nanogui::Widget(type11Window2);
-    modular3x3CubeParams2->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,3));
-    modular3x3CubeParams2->setFixedWidth(260);
-    
-    modular3x3CubeParams2->add<nanogui::Label>("Layer 1");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer1Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
-    {
-        for (int col = 0; col < 3; ++col)
-        {
-            layer1Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
-            layer1Buttons2[row][col]->setFlags(1 << 2);
-        }
-    }
-
-    modular3x3CubeParams2->add<nanogui::Label>("Layer 2");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer2Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
-    {
-        for (int col = 0; col < 3; ++col)
-        {
-            layer2Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
-            layer2Buttons2[row][col]->setFlags(1 << 2);
-        }
-    }
-
-    modular3x3CubeParams2->add<nanogui::Label>("Layer 3");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    modular3x3CubeParams2->add<nanogui::Label>("");
-    std::vector<std::vector<nanogui::Button *>> layer3Buttons2(3, std::vector<nanogui::Button *>(3, nullptr));
-    for (int row = 0; row < 3; ++row)
-    {
-        for (int col = 0; col < 3; ++col)
-        {
-            layer3Buttons2[row][col] = new nanogui::Button(modular3x3CubeParams2,"  ");
-            layer3Buttons2[row][col]->setFlags(1 << 2);
+            for (int col = 0; col < 3; ++col)
+            {
+                if (row==0&&col==0){
+                    modular3x3CubeParams->add<nanogui::Label>("Layer "+std::to_string(layer+1));
+                    modular3x3CubeParams->add<nanogui::Label>("");
+                    modular3x3CubeParams->add<nanogui::Label>("");
+                }
+                cubeButtons3[layer][row][col] = new nanogui::Button(modular3x3CubeParams, "  ");
+                cubeButtons3[layer][row][col]->setFlags(1 << 2);
+                cubeButtons3[layer][row][col]->setPushed(true);
+            }
         }
     }
 
@@ -414,7 +346,7 @@ int main()
     modular4x4CubeParams->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,4));
     modular4x4CubeParams->setFixedWidth(300);
 
-    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons(4, std::vector<std::vector<nanogui::Button *>>(4, std::vector<nanogui::Button *>(4, nullptr)));
+    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons4(4, std::vector<std::vector<nanogui::Button *>>(4, std::vector<nanogui::Button *>(4, nullptr)));
     for (int layer = 0; layer < 4; ++layer)
     {
         for (int row = 0; row < 4; ++row)
@@ -427,12 +359,59 @@ int main()
                     modular4x4CubeParams->add<nanogui::Label>("");
                     modular4x4CubeParams->add<nanogui::Label>("");
                 }
-                cubeButtons[layer][row][col] = new nanogui::Button(modular4x4CubeParams, "  ");
-                cubeButtons[layer][row][col]->setFlags(1 << 2);
-                cubeButtons[layer][row][col]->setPushed(true);
+                cubeButtons4[layer][row][col] = new nanogui::Button(modular4x4CubeParams, "  ");
+                cubeButtons4[layer][row][col]->setFlags(1 << 2);
+                cubeButtons4[layer][row][col]->setPushed(true);
             }
         }
     }
+
+    //5x5 cube
+    nanogui::ref<nanogui::Window> type13Window = new nanogui::Window(&screen, "B.Y.O. 5x5 Cube Controls: Include");
+    type13Window->setPosition(Eigen::Vector2i(330, 10));
+    type13Window->setLayout(new nanogui::GroupLayout());
+    type13Window->setSize(Eigen::Vector2i(200, 1000));
+    type13Window->setVisible(false);
+
+    nanogui::Widget *modular5x5CubeParams = new nanogui::Widget(type13Window);
+    modular5x5CubeParams->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,5));
+    modular5x5CubeParams->setFixedWidth(300);
+
+    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons5(5, std::vector<std::vector<nanogui::Button *>>(5, std::vector<nanogui::Button *>(5, nullptr)));
+    for (int layer = 0; layer < 5; ++layer)
+    {
+        for (int row = 0; row < 5; ++row)
+        {
+            for (int col = 0; col < 5; ++col)
+            {
+                if (row==0&&col==0){
+                    modular5x5CubeParams->add<nanogui::Label>("Layer "+std::to_string(layer+1));
+                    modular5x5CubeParams->add<nanogui::Label>("");
+                    modular5x5CubeParams->add<nanogui::Label>("");
+                    modular5x5CubeParams->add<nanogui::Label>("");
+                    modular5x5CubeParams->add<nanogui::Label>("");
+                }
+                cubeButtons5[layer][row][col] = new nanogui::Button(modular5x5CubeParams, "  ");
+                cubeButtons5[layer][row][col]->setFlags(1 << 2);
+                cubeButtons5[layer][row][col]->setPushed(true);
+            }
+        }
+    }
+
+    nanogui::Button *clearButton = new nanogui::Button(type13Window, "Clear");
+    clearButton->setFixedWidth(80);
+    clearButton->setCallback([&type13Window, cubeButtons5](){
+            for (int layer = 0; layer < 5; ++layer)
+            {
+                for (int row = 0; row < 5; ++row)
+                {
+                    for (int col = 0; col < 5; ++col)
+                    {
+                        cubeButtons5[layer][row][col]->setPushed(true);
+                    }
+                }
+            }
+    });
 
     nanogui::ref<nanogui::Window> infoWindow = new nanogui::Window(&screen, "Info");
     infoWindow->setPosition(Eigen::Vector2i(SCR_WIDTH - 350, 10));
@@ -454,18 +433,18 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window1, &type11Window2, &type12Window](int idx){ 
+    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
         type = idx;
-        if (type==6||type==8||type==10||type==11){
+        if (type==6||type==8||type==10||type==11||type==12){
             depthBox->setValue(4);
         }
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
         type9Window->setVisible(type == 8);
         type10Window->setVisible(type == 9);
-        type11Window1->setVisible(type == 10);
-        type11Window2->setVisible(type == 10);
+        type11Window->setVisible(type == 10);
         type12Window->setVisible(type == 11);
+        type13Window->setVisible(type == 12);
         std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
         infoBox->setValue(loadTextFile(filename));
     });
@@ -580,47 +559,14 @@ int main()
             readyToDraw2D = false;
             camera.flat = false;
         }else if (type==10){ // takes up way more lines than needed but i'm too lazy
-            for (int row = 0; row < 3; ++row)
+            for (int layer = 0; layer < 3; ++layer)
             {
-                for (int col = 0; col < 3; ++col)
+                for (int row = 0; row < 3; ++row)
                 {
-                    layer1Draw[row][col] = !(layer1Buttons1[row][col]->pushed());
-                }
-            }
-            for (int row = 0; row < 3; ++row)
-            {
-                for (int col = 0; col < 3; ++col)
-                {
-                    layer2Draw[row][col] = !(layer2Buttons1[row][col]->pushed());
-                }
-            }
-            for (int row = 0; row < 3; ++row)
-            {
-                for (int col = 0; col < 3; ++col)
-                {
-                    layer3Draw[row][col] = !(layer3Buttons1[row][col]->pushed());
-                }
-            }
-
-            for (int row = 0; row < 3; ++row)
-            {
-                for (int col = 0; col < 3; ++col)
-                {
-                    layer1Inc[row][col] = !(layer1Buttons2[row][col]->pushed());
-                }
-            }
-            for (int row = 0; row < 3; ++row)
-            {
-                for (int col = 0; col < 3; ++col)
-                {
-                    layer2Inc[row][col] = !(layer2Buttons2[row][col]->pushed());
-                }
-            }
-            for (int row = 0; row < 3; ++row)
-            {
-                for (int col = 0; col < 3; ++col)
-                {
-                    layer3Inc[row][col] = !(layer3Buttons2[row][col]->pushed());
+                    for (int col = 0; col < 3; ++col)
+                    {
+                        layerInc3[layer][row][col] = !(cubeButtons3[layer][row][col]->pushed());
+                    }
                 }
             }
             drawModular3x3Cube(cubeVert1,1,0,vertices);
@@ -635,11 +581,26 @@ int main()
                 {
                     for (int col = 0; col < 4; ++col)
                     {
-                        layerInc[layer][row][col] = !(cubeButtons[layer][row][col]->pushed());
+                        layerInc4[layer][row][col] = !(cubeButtons4[layer][row][col]->pushed());
                     }
                 }
             }
             drawModular4x4Cube(cubeVert1,1,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
+        }else if (type==12){
+            for (int layer = 0; layer < 5; ++layer)
+            {
+                for (int row = 0; row < 5; ++row)
+                {
+                    for (int col = 0; col < 5; ++col)
+                    {
+                        layerInc5[layer][row][col] = !(cubeButtons5[layer][row][col]->pushed());
+                    }
+                }
+            }
+            drawModular5x5Cube(cubeVert1,1,0,vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
@@ -770,7 +731,7 @@ int main()
             ourShader.setVec3("viewPos", camera.Position); 
 
             if (ortho){
-                float orthoSize = 1.0f;
+                float orthoSize = 1.0f * (camera.Zoom/45.0f);
                 float aspect = (float)SCR_WIDTH / (float)SCR_HEIGHT;
                 glm::mat4 projection = glm::ortho(-orthoSize * aspect, orthoSize * aspect, -orthoSize, orthoSize, 0.1f, 100.0f);
                 ourShader.setMat4("projection", projection);
@@ -810,8 +771,8 @@ int main()
                     totalRotX = preRotX + rotX;
                     totalRotY = preRotY + rotY;
                 }
-                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
-                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY*(camera.Zoom/90.0f)), glm::vec3(1.0f, 0.0f, 0.0f));
+                rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX*(camera.Zoom/90.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
                 ourShader.setMat4("model", rotatedModel);

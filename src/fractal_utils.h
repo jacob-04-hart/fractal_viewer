@@ -320,114 +320,47 @@ void drawSquare(std::vector<float> a,std::vector<float> b,std::vector<float> c,s
     vertices.insert(vertices.end(), n.begin(), n.end());
 }
 
-std::vector<std::vector<bool>> layer1Draw(3, std::vector<bool>(3, true));
-std::vector<std::vector<bool>> layer2Draw(3, std::vector<bool>(3, true));
-std::vector<std::vector<bool>> layer3Draw(3, std::vector<bool>(3, true));
-
-std::vector<std::vector<bool>> layer1Inc(3, std::vector<bool>(3, true));
-std::vector<std::vector<bool>> layer2Inc(3, std::vector<bool>(3, true));
-std::vector<std::vector<bool>> layer3Inc(3, std::vector<bool>(3, true));
+std::vector<std::vector<std::vector<bool>>> layerInc3(4, std::vector<std::vector<bool>>(4, std::vector<bool>(4, true)));
 
 void drawModular3x3Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
     float third = length/3;
     float layer1ZOffset = 0;
     float layer2ZOffset = third;
     float layer3ZOffset = third*2;
-    if(depth<maxDepth) {
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer1Inc[row][col]) drawModular3x3Cube({one[0]+(third*row),one[1]-(third*col),one[2]+layer1ZOffset},length/3,depth+1,vertices);
-            }
-        }
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer2Inc[row][col]) drawModular3x3Cube({one[0]+(third*row),one[1]-(third*col),one[2]+layer2ZOffset},length/3,depth+1,vertices);
-            }
-        }
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer3Inc[row][col]) drawModular3x3Cube({one[0]+(third*row),one[1]-(third*col),one[2]+layer3ZOffset},length/3,depth+1,vertices);
+    if (depth < maxDepth){
+        for (int layer = 0; layer < 3; ++layer)
+        {
+            float z = one[2] + (third * layer);
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    if (layerInc3[layer][row][col])
+                    {
+                        drawModular3x3Cube({one[0] + (third * row), one[1] - (third * col), z}, third, depth + 1, vertices);
+                    }
+                }
             }
         }
     } else {
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer1Draw[row][col]) {
-                    std::vector<float> newOne = {one[0]+(third*row),one[1]-(third*col),one[2]+layer1ZOffset};
-                    std::vector<float> two = {newOne[0]+third, newOne[1], newOne[2]};
-                    std::vector<float> three = {newOne[0], newOne[1]-third, newOne[2]};
-                    std::vector<float> four = {newOne[0]+third, newOne[1]-third, newOne[2]};
-                    std::vector<float> five = {newOne[0], newOne[1], newOne[2]+third};
-                    std::vector<float> six = {newOne[0]+third, newOne[1], newOne[2]+third};
-                    std::vector<float> seven = {newOne[0], newOne[1]-third, newOne[2]+third};
-                    std::vector<float> eight = {newOne[0]+third, newOne[1]-third, newOne[2]+third};
-                    drawSquare(newOne,two,three,four,color1,vertices);
-                    drawSquare(six,five,eight,seven,color2,vertices);
-                    drawSquare(five,six,newOne,two,color3,vertices);
-                    drawSquare(eight,seven,four,three,color4,vertices);
-                    drawSquare(two,six,four,eight,color5,vertices);
-                    drawSquare(five,newOne,seven,three,color6,vertices);
-                }
-            }
-        }
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer2Draw[row][col]) {
-                    std::vector<float> newOne = {one[0] + (third * row), one[1] - (third * col), one[2] + layer2ZOffset};
-                    std::vector<float> two = {newOne[0] + third, newOne[1], newOne[2]};
-                    std::vector<float> three = {newOne[0], newOne[1] - third, newOne[2]};
-                    std::vector<float> four = {newOne[0] + third, newOne[1] - third, newOne[2]};
-                    std::vector<float> five = {newOne[0], newOne[1], newOne[2] + third};
-                    std::vector<float> six = {newOne[0] + third, newOne[1], newOne[2] + third};
-                    std::vector<float> seven = {newOne[0], newOne[1] - third, newOne[2] + third};
-                    std::vector<float> eight = {newOne[0] + third, newOne[1] - third, newOne[2] + third};
-                    drawSquare(newOne, two, three, four, color1, vertices);
-                    drawSquare(six, five, eight, seven, color2, vertices);
-                    drawSquare(five, six, newOne, two, color3, vertices);
-                    drawSquare(eight, seven, four, three, color4, vertices);
-                    drawSquare(two, six, four, eight, color5, vertices);
-                    drawSquare(five, newOne, seven, three, color6, vertices);
-                }
-            }
-        }
-        for (int row = 0;row < 3;row++) {
-            for (int col = 0;col < 3;col++) {
-                if (layer3Draw[row][col]) {
-                    std::vector<float> newOne = {one[0] + (third * row), one[1] - (third * col), one[2] + layer3ZOffset};
-                    std::vector<float> two = {newOne[0] + third, newOne[1], newOne[2]};
-                    std::vector<float> three = {newOne[0], newOne[1] - third, newOne[2]};
-                    std::vector<float> four = {newOne[0] + third, newOne[1] - third, newOne[2]};
-                    std::vector<float> five = {newOne[0], newOne[1], newOne[2] + third};
-                    std::vector<float> six = {newOne[0] + third, newOne[1], newOne[2] + third};
-                    std::vector<float> seven = {newOne[0], newOne[1] - third, newOne[2] + third};
-                    std::vector<float> eight = {newOne[0] + third, newOne[1] - third, newOne[2] + third};
-                    drawSquare(newOne, two, three, four, color1, vertices);
-                    drawSquare(six, five, eight, seven, color2, vertices);
-                    drawSquare(five, six, newOne, two, color3, vertices);
-                    drawSquare(eight, seven, four, three, color4, vertices);
-                    drawSquare(two, six, four, eight, color5, vertices);
-                    drawSquare(five, newOne, seven, three, color6, vertices);
-                }       
-            }
-        }
-        // std::vector<float> two = {one[0]+length, one[1], one[2]};
-        // std::vector<float> three = {one[0], one[1]-length, one[2]};
-        // std::vector<float> four = {one[0]+length, one[1]-length, one[2]};
-        // std::vector<float> five = {one[0], one[1], one[2]+length};
-        // std::vector<float> six = {one[0]+length, one[1], one[2]+length};
-        // std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
-        // std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
+        std::vector<float> two = {one[0]+length, one[1], one[2]};
+        std::vector<float> three = {one[0], one[1]-length, one[2]};
+        std::vector<float> four = {one[0]+length, one[1]-length, one[2]};
+        std::vector<float> five = {one[0], one[1], one[2]+length};
+        std::vector<float> six = {one[0]+length, one[1], one[2]+length};
+        std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
+        std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        // drawSquare(one,two,three,four,color1,vertices);
-        // drawSquare(six,five,eight,seven,color2,vertices);
-        // drawSquare(five,six,one,two,color3,vertices);
-        // drawSquare(eight,seven,four,three,color4,vertices);
-        // drawSquare(two,six,four,eight,color5,vertices);
-        // drawSquare(five,one,seven,three,color6,vertices);
+        drawSquare(one,two,three,four,color1,vertices);
+        drawSquare(six,five,eight,seven,color2,vertices);
+        drawSquare(five,six,one,two,color3,vertices);
+        drawSquare(eight,seven,four,three,color4,vertices);
+        drawSquare(two,six,four,eight,color5,vertices);
+        drawSquare(five,one,seven,three,color6,vertices);
     }
 }
 
-std::vector<std::vector<std::vector<bool>>> layerInc(4, std::vector<std::vector<bool>>(4, std::vector<bool>(4, true)));
+std::vector<std::vector<std::vector<bool>>> layerInc4(4, std::vector<std::vector<bool>>(4, std::vector<bool>(4, true)));
 void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
     float fourth = length/4;
     if (depth < maxDepth){
@@ -438,9 +371,45 @@ void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::ve
             {
                 for (int col = 0; col < 4; ++col)
                 {
-                    if (layerInc[layer][row][col])
+                    if (layerInc4[layer][row][col])
                     {
                         drawModular4x4Cube({one[0] + (fourth * row), one[1] - (fourth * col), z}, fourth, depth + 1, vertices);
+                    }
+                }
+            }
+        }
+    } else {
+        std::vector<float> two = {one[0]+length, one[1], one[2]};
+        std::vector<float> three = {one[0], one[1]-length, one[2]};
+        std::vector<float> four = {one[0]+length, one[1]-length, one[2]};
+        std::vector<float> five = {one[0], one[1], one[2]+length};
+        std::vector<float> six = {one[0]+length, one[1], one[2]+length};
+        std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
+        std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
+
+        drawSquare(one,two,three,four,color1,vertices);
+        drawSquare(six,five,eight,seven,color2,vertices);
+        drawSquare(five,six,one,two,color3,vertices);
+        drawSquare(eight,seven,four,three,color4,vertices);
+        drawSquare(two,six,four,eight,color5,vertices);
+        drawSquare(five,one,seven,three,color6,vertices);
+    }
+}
+
+std::vector<std::vector<std::vector<bool>>> layerInc5(5, std::vector<std::vector<bool>>(5, std::vector<bool>(5, true)));
+void drawModular5x5Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    float fifth = length/5;
+    if (depth < maxDepth){
+        for (int layer = 0; layer < 5; ++layer)
+        {
+            float z = one[2] + (fifth * layer);
+            for (int row = 0; row < 5; ++row)
+            {
+                for (int col = 0; col < 5; ++col)
+                {
+                    if (layerInc5[layer][row][col])
+                    {
+                        drawModular5x5Cube({one[0] + (fifth * row), one[1] - (fifth * col), z}, fifth, depth + 1, vertices);
                     }
                 }
             }
