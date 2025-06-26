@@ -232,11 +232,14 @@ int main()
     nanogui::CheckBox *perspectiveBox = new nanogui::CheckBox(params, "Orthographic");
     perspectiveBox->setChecked(false);
 
+    nanogui::CheckBox *lightingBox = new nanogui::CheckBox(params, "Lighting");
+    lightingBox->setChecked(true);
+
     bool ortho = false;
 
     // window for type 1 specific params
     nanogui::ref<nanogui::Window> type1Window = new nanogui::Window(&screen, "Split Koch Parameters");
-    type1Window->setPosition(Eigen::Vector2i(10, 520));
+    type1Window->setPosition(Eigen::Vector2i(10, 545));
     type1Window->setLayout(new nanogui::GroupLayout());
     type1Window->setSize(Eigen::Vector2i(270, 1000));
 
@@ -256,7 +259,7 @@ int main()
 
     // window for type 9 specific parameters
     nanogui::ref<nanogui::Window> type9Window = new nanogui::Window(&screen, "L-Sponge Parameters");
-    type9Window->setPosition(Eigen::Vector2i(10, 520));
+    type9Window->setPosition(Eigen::Vector2i(10, 5450));
     type9Window->setLayout(new nanogui::GroupLayout());
     type9Window->setSize(Eigen::Vector2i(270, 1000));
     type9Window->setVisible(false);
@@ -271,7 +274,7 @@ int main()
     
     // modular tet params
     nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. Tetrahedron Controls");
-    type10Window->setPosition(Eigen::Vector2i(10, 520));
+    type10Window->setPosition(Eigen::Vector2i(10, 545));
     type10Window->setLayout(new nanogui::GroupLayout());
     type10Window->setSize(Eigen::Vector2i(270, 1000));
     type10Window->setVisible(false);
@@ -307,7 +310,7 @@ int main()
     // modular 3x3 cube params
 
     nanogui::ref<nanogui::Window> type11Window = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
-    type11Window->setPosition(Eigen::Vector2i(10, 520));
+    type11Window->setPosition(Eigen::Vector2i(10, 545));
     type11Window->setLayout(new nanogui::GroupLayout());
     type11Window->setSize(Eigen::Vector2i(200, 1000));
     type11Window->setVisible(false);
@@ -729,6 +732,7 @@ int main()
             ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
             ourShader.setVec3("lightPos", lightPos);
             ourShader.setVec3("viewPos", camera.Position); 
+            ourShader.setBool("lightToggle",lightingBox->checked());
 
             if (ortho){
                 float orthoSize = 1.0f * (camera.Zoom/45.0f);
@@ -914,7 +918,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
             rotY = 0;
             justStartedDragging = false;
         } else {
-            float sensitivity = 0.2f;
+            float sensitivity = 0.15f;
             rotX = (xpos - orgX) * sensitivity;
             rotY = (ypos - orgY) * sensitivity;
         }
