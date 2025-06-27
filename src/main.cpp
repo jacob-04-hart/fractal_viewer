@@ -475,7 +475,6 @@ int main()
         color5 = {c5.r(), c5.g(), c5.b()};
         nanogui::Color c6 = colorWheel6->color();
         color6 = {c6.r(), c6.g(), c6.b()};
-        ortho = perspectiveBox->checked();
         vertices.clear();
         if (type==0){
             d4Top.at(2) = -(thicknessBox->value()/2);
@@ -733,6 +732,7 @@ int main()
             ourShader.setVec3("lightPos", lightPos);
             ourShader.setVec3("viewPos", camera.Position); 
             ourShader.setBool("lightToggle",lightingBox->checked());
+            ortho = perspectiveBox->checked();
 
             if (ortho){
                 float orthoSize = 1.0f * (camera.Zoom/45.0f);
@@ -755,6 +755,13 @@ int main()
                 totalRotX = preRotX + rotX;
                 totalRotY = preRotY + rotY;
             }
+
+            float maxAngle = 89.0f;
+            if (totalRotY > maxAngle)
+                totalRotY = maxAngle;
+            if (totalRotY < -maxAngle)
+                totalRotY = -maxAngle;
+
             model = glm::rotate(model, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
             model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
             ourShader.setMat4("model", model);
@@ -881,6 +888,11 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             isFirstDown = true;
             preRotX += rotX;
             preRotY += rotY;
+
+            float maxAngle = 89.0f;
+            if (preRotY > maxAngle) preRotY = maxAngle;
+            if (preRotY < -maxAngle) preRotY = -maxAngle;
+
             rotX = 0;
             rotY = 0;
         }
