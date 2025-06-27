@@ -748,6 +748,10 @@ int main()
             ourShader.setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
+            float cornerAngleY = 45.0f;
+            float cornerAngleX = 35.26f;
+            //model = glm::rotate(model, glm::radians(cornerAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+            //model = glm::rotate(model, glm::radians(cornerAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
             if(isFirstDown){
                 totalRotX = preRotX;
                 totalRotY = preRotY;
@@ -970,6 +974,12 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(IN, cappedDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         camera.ProcessKeyboard(OUT, cappedDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        preRotX = 0;
+        preRotY = 0;
+        rotX = 0;
+        rotY = 0;
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
