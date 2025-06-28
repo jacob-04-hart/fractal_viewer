@@ -235,11 +235,20 @@ int main()
     nanogui::CheckBox *lightingBox = new nanogui::CheckBox(params, "Lighting");
     lightingBox->setChecked(true);
 
+    std::vector<std::string> perspectiveOptions = {"None","Corner 1","Corner 2","Corner 3","Corner 4","Corner 5","Corner 6","Corner 7","Corner 8",};
+    int perspective = 0;
+
+    new nanogui::Label(params, "Preset Perspectives");
+    auto *pCombo = new nanogui::ComboBox(params, perspectiveOptions);
+    pCombo->setSelectedIndex(perspective);
+    pCombo->setFixedWidth(150);
+
+
     bool ortho = false;
 
     // window for type 1 specific params
     nanogui::ref<nanogui::Window> type1Window = new nanogui::Window(&screen, "Split Koch Parameters");
-    type1Window->setPosition(Eigen::Vector2i(10, 545));
+    type1Window->setPosition(Eigen::Vector2i(10, 615));
     type1Window->setLayout(new nanogui::GroupLayout());
     type1Window->setSize(Eigen::Vector2i(270, 1000));
 
@@ -259,7 +268,7 @@ int main()
 
     // window for type 9 specific parameters
     nanogui::ref<nanogui::Window> type9Window = new nanogui::Window(&screen, "L-Sponge Parameters");
-    type9Window->setPosition(Eigen::Vector2i(10, 5450));
+    type9Window->setPosition(Eigen::Vector2i(10, 6150));
     type9Window->setLayout(new nanogui::GroupLayout());
     type9Window->setSize(Eigen::Vector2i(270, 1000));
     type9Window->setVisible(false);
@@ -274,7 +283,7 @@ int main()
     
     // modular tet params
     nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. Tetrahedron Controls");
-    type10Window->setPosition(Eigen::Vector2i(10, 545));
+    type10Window->setPosition(Eigen::Vector2i(10, 615));
     type10Window->setLayout(new nanogui::GroupLayout());
     type10Window->setSize(Eigen::Vector2i(270, 1000));
     type10Window->setVisible(false);
@@ -310,7 +319,7 @@ int main()
     // modular 3x3 cube params
 
     nanogui::ref<nanogui::Window> type11Window = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
-    type11Window->setPosition(Eigen::Vector2i(10, 545));
+    type11Window->setPosition(Eigen::Vector2i(10, 615));
     type11Window->setLayout(new nanogui::GroupLayout());
     type11Window->setSize(Eigen::Vector2i(200, 1000));
     type11Window->setVisible(false);
@@ -450,6 +459,10 @@ int main()
         type13Window->setVisible(type == 12);
         std::string filename = "../resources/info/type" + std::to_string(type) + ".txt";
         infoBox->setValue(loadTextFile(filename));
+    });
+
+    pCombo->setCallback([&perspective](int idx){
+        perspective = idx;
     });
 
     nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
@@ -748,26 +761,50 @@ int main()
             ourShader.setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
-            float cornerAngleY = 45.0f;
-            float cornerAngleX = 35.26f;
-            //model = glm::rotate(model, glm::radians(cornerAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
-            //model = glm::rotate(model, glm::radians(cornerAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
-            if(isFirstDown){
-                totalRotX = preRotX;
-                totalRotY = preRotY;
-            }else{
-                totalRotX = preRotX + rotX;
-                totalRotY = preRotY + rotY;
+            if(perspective==0){
+                if (isFirstDown)
+                {
+                    totalRotX = preRotX;
+                    totalRotY = preRotY;
+                }
+                else
+                {
+                    totalRotX = preRotX + rotX;
+                    totalRotY = preRotY + rotY;
+                }
+
+                float maxAngle = 89.0f;
+                if (totalRotY > maxAngle)
+                    totalRotY = maxAngle;
+                if (totalRotY < -maxAngle)
+                    totalRotY = -maxAngle;
+
+                model = glm::rotate(model, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
+            } else {
+                struct CornerRotation
+                {
+                    float angleY;
+                    float angleX;
+                };
+
+                CornerRotation rotations[9] = {
+                    {0.0f, 0.0f},              // 0 = none
+                    {45.0f, 35.26f},           // 1: +X +Y +Z
+                    {135.0f, 35.26f},          // 2: -X +Y +Z
+                    {135.0f, -35.26f},         // 3: -X -Y +Z
+                    {45.0f, -35.26f},          // 4: +X -Y +Z
+                    {-45.0f, 35.26f},   // 5: +X +Y -Z
+                    {-135.0f, 35.26f},  // 6: -X +Y -Z
+                    {-135.0f, -35.26f}, // 7: -X -Y -Z
+                    {-45.0f, -35.26f},  // 8: +X -Y -Z
+                };
+                float angleY = rotations[perspective].angleY;
+                float angleX = rotations[perspective].angleX;
+
+                model = glm::rotate(model, glm::radians(angleX), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::rotate(model, glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
             }
-
-            float maxAngle = 89.0f;
-            if (totalRotY > maxAngle)
-                totalRotY = maxAngle;
-            if (totalRotY < -maxAngle)
-                totalRotY = -maxAngle;
-
-            model = glm::rotate(model, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
             ourShader.setMat4("model", model);
 
             glBindVertexArray(VAO);
@@ -822,7 +859,7 @@ int main()
         glDisable(GL_DEPTH_TEST);
 
         // Update button vertices for bottom right
-        float buttonWidth = 400.0f, buttonHeight = 400.0f;
+        float buttonWidth = 300.0f, buttonHeight = 300.0f;
         float x0 = SCR_WIDTH - buttonWidth - 20.0f;
         float y0 = 20.0f;
         float x1 = SCR_WIDTH - 20.0f;
@@ -979,6 +1016,7 @@ void processInput(GLFWwindow *window)
         preRotY = 0;
         rotX = 0;
         rotY = 0;
+        camera.Position = glm::vec3(0.0f, 0.0f, 0.0f);
     }
 }
 
