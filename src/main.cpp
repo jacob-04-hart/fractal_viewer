@@ -238,7 +238,7 @@ int main()
     std::vector<std::string> perspectiveOptions = {"None","Corner 1","Corner 2","Corner 3","Corner 4","Corner 5","Corner 6","Corner 7","Corner 8",};
     int perspective = 0;
 
-    new nanogui::Label(params, "Preset Perspectives");
+    new nanogui::Label(params, "Preset Perspectives (Locked)");
     auto *pCombo = new nanogui::ComboBox(params, perspectiveOptions);
     pCombo->setSelectedIndex(perspective);
     pCombo->setFixedWidth(150);
@@ -1016,7 +1016,7 @@ void processInput(GLFWwindow *window)
         preRotY = 0;
         rotX = 0;
         rotY = 0;
-        camera.Position = glm::vec3(0.0f, 0.0f, 0.0f);
+        camera.Position = glm::vec3(0.0f, 0.0f, 3.0f);
     }
 }
 
