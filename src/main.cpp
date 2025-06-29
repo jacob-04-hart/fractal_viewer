@@ -85,6 +85,7 @@ void char_callback(GLFWwindow* window, unsigned int codepoint);
 
 nanogui::Screen* g_screen = nullptr;
 nanogui::IntBox<int>* depthBox = nullptr;
+nanogui::Button* generateButton = nullptr;
 
 int main()
 {   
@@ -478,7 +479,7 @@ int main()
 
     new nanogui::Widget(generateButtonContainer);
 
-    nanogui::Button *generateButton = new nanogui::Button(generateButtonContainer, "Generate");
+    generateButton = new nanogui::Button(generateButtonContainer, "Generate");
     generateButton->setFixedWidth(240);
 
     generateButton->setCallback([&]() {
@@ -784,7 +785,7 @@ int main()
                     totalRotY = preRotY + rotY;
                 }
 
-                float maxAngle = 89.0f;
+                float maxAngle = 90.0f;
                 if (totalRotY > maxAngle)
                     totalRotY = maxAngle;
                 if (totalRotY < -maxAngle)
@@ -941,7 +942,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             preRotX += rotX;
             preRotY += rotY;
 
-            float maxAngle = 89.0f;
+            float maxAngle = 90.0f;
             if (preRotY > maxAngle) preRotY = maxAngle;
             if (preRotY < -maxAngle) preRotY = -maxAngle;
 
@@ -1056,7 +1057,7 @@ void processInput(GLFWwindow *window)
     }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
         if (!generatePress)
         {
-            
+            generateButton->callback()();
         }
         generatePress = true;
     }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
