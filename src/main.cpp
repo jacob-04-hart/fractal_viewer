@@ -84,6 +84,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void char_callback(GLFWwindow* window, unsigned int codepoint);
 
 nanogui::Screen* g_screen = nullptr;
+nanogui::IntBox<int>* depthBox = nullptr;
 
 int main()
 {   
@@ -203,6 +204,12 @@ int main()
     nanogui::ColorWheel *colorWheel6 = new nanogui::ColorWheel(layer6);
     colorWheel6->setColor(nanogui::Color(color6[0], color6[1], color6[2], 1.0f));
 
+    nanogui::Widget* layer7 = colors->createTab("7");
+    layer7->setLayout(new nanogui::GroupLayout());
+    new nanogui::Label(layer7, "Color 7 (background)");
+    nanogui::ColorWheel *colorWheel7 = new nanogui::ColorWheel(layer7);
+    colorWheel7->setColor(nanogui::Color(color7[0], color7[1], color7[2], 1.0f));
+
     colors->setActiveTab(0);
 
     new nanogui::Label(mainWindow, "3D Parameters");
@@ -217,7 +224,7 @@ int main()
 
     new nanogui::Widget(depthBoxContainer);
 
-    nanogui::IntBox<int> *depthBox = new nanogui::IntBox<int>(depthBoxContainer);
+    depthBox = new nanogui::IntBox<int>(depthBoxContainer);
     depthBox->setValue(initialMaxDepth);
     depthBox->setEditable(true);
     depthBox->setMinValue(0);
@@ -445,7 +452,7 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, depthBox, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
+    combo->setCallback([&type, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
         type = idx;
         if (type==6||type==8||type==10||type==11||type==12){
             depthBox->setValue(4);
@@ -474,7 +481,7 @@ int main()
     nanogui::Button *generateButton = new nanogui::Button(generateButtonContainer, "Generate");
     generateButton->setFixedWidth(240);
 
-    generateButton->setCallback([&, depthBox]() {
+    generateButton->setCallback([&]() {
         setMaxDepth(depthBox->value());
         nanogui::Color c1 = colorWheel1->color();
         color1 = {c1.r(), c1.g(), c1.b()};
@@ -723,6 +730,8 @@ int main()
     glEnable(GL_STENCIL_TEST);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
+    nanogui::Color c7 = colorWheel7->color();
+
     while (!glfwWindowShouldClose(window))
     {   
         int width, height;
@@ -736,7 +745,9 @@ int main()
 
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        c7 = colorWheel7->color();
+        color7 = {c7.r(), c7.g(), c7.b()};
+        glClearColor(color7[0], color7[1], color7[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         if (readyToDraw3D) {
@@ -994,6 +1005,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
+bool depthUp = false;
+bool depthDown = false;
+bool generatePress = false;
+
 void processInput(GLFWwindow *window)
 {   
     float cappedDeltaTime = std::min(deltaTime, 0.016f);
@@ -1017,6 +1032,35 @@ void processInput(GLFWwindow *window)
         rotX = 0;
         rotY = 0;
         camera.Position = glm::vec3(0.0f, 0.0f, 3.0f);
+    }if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        if (!depthDown && depthBox)
+        {
+            int val = depthBox->value();
+            if (val > 0)
+                depthBox->setValue(val - 1);
+        }
+        depthDown = true;
+    }if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE) {
+        depthDown = false;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        if (!depthUp && depthBox)
+        {
+            int val = depthBox->value();
+            if (val < 15)
+                depthBox->setValue(val + 1);
+        }
+        depthUp = true;
+    }if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+        depthUp = false;
+    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+        if (!generatePress)
+        {
+            
+        }
+        generatePress = true;
+    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+        generatePress = false;
     }
 }
 

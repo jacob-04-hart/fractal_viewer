@@ -10,6 +10,7 @@ std::vector<float> color3 = {0.0f, 0.0f, 1.0f}; // blue
 std::vector<float> color4 = {1.0f, 0.5f, 0.0f}; // orange
 std::vector<float> color5 = {1.0f, 1.0f, 0.0f}; // yellow
 std::vector<float> color6 = {0.5f, 0.0f, 0.5f}; // purple
+std::vector<float> color7 = {0.2f, 0.3f, 0.3f}; // learnOpenGL green
 
 unsigned int maxDepth = 6; // change this to either save or set fire to your computer
 
