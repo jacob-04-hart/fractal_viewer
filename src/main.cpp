@@ -68,6 +68,7 @@ float buttonX1 = 0.0f;
 float buttonY1 = 0.0f;
 
 bool overMascot = false;
+bool hideUi = false;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -152,7 +153,7 @@ int main()
     int type = 0;
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
-                                            "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: Tetrahedron",
+                                            "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: 2x2 Cube",
                                             "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
@@ -289,45 +290,55 @@ int main()
     nanogui::CheckBox *experimentalBox = new nanogui::CheckBox(lSpongeParams, "Experimental Recursive Sizing");
     experimentalBox->setChecked(false);
     
-    // modular tet params
-    nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. Tetrahedron Controls");
+    // modular 3x3 cube params
+
+    nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. 2x2 Cube Controls: Include");
     type10Window->setPosition(Eigen::Vector2i(10, 615));
     type10Window->setLayout(new nanogui::GroupLayout());
-    type10Window->setSize(Eigen::Vector2i(270, 1000));
+    type10Window->setSize(Eigen::Vector2i(200, 1000));
     type10Window->setVisible(false);
 
-    nanogui::Widget *modularTetParams = new nanogui::Widget(type10Window);
-    modularTetParams->setLayout(new nanogui::GroupLayout());
-    modularTetParams->setFixedWidth(260);
+    nanogui::Widget *modular2x2CubeParams = new nanogui::Widget(type10Window);
+    modular2x2CubeParams->setLayout(new nanogui::GridLayout(nanogui::Orientation::Horizontal,2));
+    modular2x2CubeParams->setFixedWidth(260);
     
-    modularTetParams->add<nanogui::Label>("Choose which sections to draw:");
-    nanogui::CheckBox *drawTetABox = new nanogui::CheckBox(modularTetParams, "Tetrahedron A");
-    drawTetABox->setChecked(true);
-    nanogui::CheckBox *drawTetBBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron B");
-    drawTetBBox->setChecked(true);
-    nanogui::CheckBox *drawTetCBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron C");
-    drawTetCBox->setChecked(true);
-    nanogui::CheckBox *drawTetDBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron D");
-    drawTetDBox->setChecked(true);
-    nanogui::CheckBox *drawOctaBox = new nanogui::CheckBox(modularTetParams, "Center Octahedron");
-    drawOctaBox->setChecked(true);
-    
-    modularTetParams->add<nanogui::Label>("Choose which sections to include:");
-    nanogui::CheckBox *incTetABox = new nanogui::CheckBox(modularTetParams, "Tetrahedron A");
-    incTetABox->setChecked(true);
-    nanogui::CheckBox *incTetBBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron B");
-    incTetBBox->setChecked(true);
-    nanogui::CheckBox *incTetCBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron C");
-    incTetCBox->setChecked(true);
-    nanogui::CheckBox *incTetDBox = new nanogui::CheckBox(modularTetParams, "Tetrahedron D");
-    incTetDBox->setChecked(true);
+    std::vector<std::vector<std::vector<nanogui::Button *>>> cubeButtons2(2, std::vector<std::vector<nanogui::Button *>>(2, std::vector<nanogui::Button *>(2, nullptr)));
+    for (int layer = 0; layer < 2; ++layer)
+    {
+        for (int row = 0; row < 2; ++row)
+        {
+            for (int col = 0; col < 2; ++col)
+            {
+                if (row==0&&col==0){
+                    modular2x2CubeParams->add<nanogui::Label>("Layer "+std::to_string(layer+1));
+                    modular2x2CubeParams->add<nanogui::Label>("");
+                }
+                cubeButtons2[layer][row][col] = new nanogui::Button(modular2x2CubeParams, "  ");
+                cubeButtons2[layer][row][col]->setFlags(1 << 2);
+                cubeButtons2[layer][row][col]->setPushed(true);
+            }
+        }
+    }
 
-    modularTetParams->add<nanogui::Label>("For more information, click on Sir Pinski.");
+    nanogui::Button *clearButton2 = new nanogui::Button(type10Window, "Clear");
+    clearButton2->setFixedWidth(80);
+    clearButton2->setCallback([&type10Window, cubeButtons2](){
+            for (int layer = 0; layer < 2; ++layer)
+            {
+                for (int row = 0; row < 2; ++row)
+                {
+                    for (int col = 0; col < 2; ++col)
+                    {
+                        cubeButtons2[layer][row][col]->setPushed(true);
+                    }
+                }
+            }
+    });
     
     // modular 3x3 cube params
 
     nanogui::ref<nanogui::Window> type11Window = new nanogui::Window(&screen, "B.Y.O. 3x3 Cube Controls: Include");
-    type11Window->setPosition(Eigen::Vector2i(10, 615));
+    type11Window->setPosition(Eigen::Vector2i(330, 10));
     type11Window->setLayout(new nanogui::GroupLayout());
     type11Window->setSize(Eigen::Vector2i(200, 1000));
     type11Window->setVisible(false);
@@ -354,6 +365,21 @@ int main()
             }
         }
     }
+
+    nanogui::Button *clearButton3 = new nanogui::Button(type11Window, "Clear");
+    clearButton3->setFixedWidth(80);
+    clearButton3->setCallback([&type11Window, cubeButtons3](){
+            for (int layer = 0; layer < 3; ++layer)
+            {
+                for (int row = 0; row < 3; ++row)
+                {
+                    for (int col = 0; col < 3; ++col)
+                    {
+                        cubeButtons3[layer][row][col]->setPushed(true);
+                    }
+                }
+            }
+    });
 
     //4x4 cube
     nanogui::ref<nanogui::Window> type12Window = new nanogui::Window(&screen, "B.Y.O. 4x4 Cube Controls: Include");
@@ -385,6 +411,21 @@ int main()
             }
         }
     }
+
+    nanogui::Button *clearButton4 = new nanogui::Button(type12Window, "Clear");
+    clearButton4->setFixedWidth(80);
+    clearButton4->setCallback([&type12Window, cubeButtons4](){
+            for (int layer = 0; layer < 4; ++layer)
+            {
+                for (int row = 0; row < 4; ++row)
+                {
+                    for (int col = 0; col < 4; ++col)
+                    {
+                        cubeButtons4[layer][row][col]->setPushed(true);
+                    }
+                }
+            }
+    });
 
     //5x5 cube
     nanogui::ref<nanogui::Window> type13Window = new nanogui::Window(&screen, "B.Y.O. 5x5 Cube Controls: Include");
@@ -418,9 +459,9 @@ int main()
         }
     }
 
-    nanogui::Button *clearButton = new nanogui::Button(type13Window, "Clear");
-    clearButton->setFixedWidth(80);
-    clearButton->setCallback([&type13Window, cubeButtons5](){
+    nanogui::Button *clearButton5 = new nanogui::Button(type13Window, "Clear");
+    clearButton5->setFixedWidth(80);
+    clearButton5->setCallback([&type13Window, cubeButtons5](){
             for (int layer = 0; layer < 5; ++layer)
             {
                 for (int row = 0; row < 5; ++row)
@@ -455,8 +496,10 @@ int main()
 
     combo->setCallback([&type, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
         type = idx;
-        if (type==6||type==8||type==10||type==11||type==12){
+        if (type==6||type==8){
             depthBox->setValue(4);
+        } else if (depthBox->value()>3&&(type==9||type==10||type==11||type==12)) {
+            depthBox->setValue(3);
         }
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
@@ -568,16 +611,18 @@ int main()
             readyToDraw2D = false;
             camera.flat = false;
         }else if (type==9){
-            drawTet1 = drawTetABox->checked();
-            drawTet2 = drawTetBBox->checked();
-            drawTet3 = drawTetCBox->checked();
-            drawTet4 = drawTetDBox->checked();
-            drawOcta = drawOctaBox->checked();
-            incTet1 = incTetABox->checked();
-            incTet2 = incTetBBox->checked();
-            incTet3 = incTetCBox->checked();
-            incTet4 = incTetDBox->checked();
-            drawModularTetrahedron(tetA,tetB,tetC,tetD,0,vertices);
+            for (int layer = 0; layer < 2; ++layer)
+            {
+                for (int row = 0; row < 2; ++row)
+                {
+                    for (int col = 0; col < 2; ++col)
+                    {
+                        layerInc2[abs(layer-1)][abs(row-1)][abs(col-1)] = !(cubeButtons2[layer][row][col]->pushed());
+                    }
+                }
+            }
+            drawModular2x2Cube(cubeVert1,1,0,vertices);
+
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
@@ -588,7 +633,7 @@ int main()
                 {
                     for (int col = 0; col < 3; ++col)
                     {
-                        layerInc3[layer][row][col] = !(cubeButtons3[layer][row][col]->pushed());
+                        layerInc3[abs(layer-2)][abs(row-2)][abs(col-2)] = !(cubeButtons3[layer][row][col]->pushed());
                     }
                 }
             }
@@ -604,7 +649,7 @@ int main()
                 {
                     for (int col = 0; col < 4; ++col)
                     {
-                        layerInc4[layer][row][col] = !(cubeButtons4[layer][row][col]->pushed());
+                        layerInc4[abs(layer-3)][abs(row-3)][abs(col-3)] = !(cubeButtons4[layer][row][col]->pushed());
                     }
                 }
             }
@@ -619,7 +664,7 @@ int main()
                 {
                     for (int col = 0; col < 5; ++col)
                     {
-                        layerInc5[layer][row][col] = !(cubeButtons5[layer][row][col]->pushed());
+                        layerInc5[abs(layer-3)][abs(row-3)][abs(col-3)] = !(cubeButtons5[layer][row][col]->pushed());
                     }
                 }
             }
@@ -864,40 +909,42 @@ int main()
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
         }
+        if (!hideUi) {
+            screen.drawContents();
+            screen.drawWidgets();
 
-        screen.drawContents();
-        screen.drawWidgets();
+            glDisable(GL_DEPTH_TEST);
 
-        glDisable(GL_DEPTH_TEST);
+            // Update button vertices for bottom right
+            float buttonWidth = 300.0f, buttonHeight = 300.0f;
+            float x0 = SCR_WIDTH - buttonWidth - 20.0f;
+            float y0 = 20.0f;
+            float x1 = SCR_WIDTH - 20.0f;
+            float y1 = 20.0f + buttonHeight;
+            buttonX0 = x0;
+            buttonY0 = y0;
+            buttonX1 = x1;
+            buttonY1 = y1;
+            float buttonVertices[] = {
+                x0, y0, 0.0f, 0.0f,
+                x1, y0, 1.0f, 0.0f,
+                x1, y1, 1.0f, 1.0f,
+                x0, y1, 0.0f, 1.0f};
 
-        // Update button vertices for bottom right
-        float buttonWidth = 300.0f, buttonHeight = 300.0f;
-        float x0 = SCR_WIDTH - buttonWidth - 20.0f;
-        float y0 = 20.0f;
-        float x1 = SCR_WIDTH - 20.0f;
-        float y1 = 20.0f + buttonHeight;
-        buttonX0 = x0;
-        buttonY0 = y0;
-        buttonX1 = x1;
-        buttonY1 = y1;
-        float buttonVertices[] = {
-            x0, y0, 0.0f, 0.0f,
-            x1, y0, 1.0f, 0.0f,
-            x1, y1, 1.0f, 1.0f,
-            x0, y1, 0.0f, 1.0f};
+            glBindBuffer(GL_ARRAY_BUFFER, buttonVBO);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buttonVertices), buttonVertices);
 
-        glBindBuffer(GL_ARRAY_BUFFER, buttonVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buttonVertices), buttonVertices);
+            glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
+            buttonShader.use();
+            buttonShader.setMat4("projection", ortho);
 
-        glm::mat4 ortho = glm::ortho(0.0f, (float)SCR_WIDTH, 0.0f, (float)SCR_HEIGHT);
-        buttonShader.use();
-        buttonShader.setMat4("projection", ortho);
-
-        glBindVertexArray(buttonVAO);
-        if (overMascot) glBindTexture(GL_TEXTURE_2D, texture2);
-        else glBindTexture(GL_TEXTURE_2D, texture1);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+            glBindVertexArray(buttonVAO);
+            if (overMascot)
+                glBindTexture(GL_TEXTURE_2D, texture2);
+            else
+                glBindTexture(GL_TEXTURE_2D, texture1);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
         // Restore OpenGL state NanoGUI may have changed
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
@@ -1009,6 +1056,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 bool depthUp = false;
 bool depthDown = false;
 bool generatePress = false;
+bool hideUiPress = false;
 
 void processInput(GLFWwindow *window)
 {   
@@ -1041,9 +1089,8 @@ void processInput(GLFWwindow *window)
                 depthBox->setValue(val - 1);
         }
         depthDown = true;
-    }if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE) {
+    }if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE)
         depthDown = false;
-    }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
         if (!depthUp && depthBox)
         {
@@ -1052,17 +1099,25 @@ void processInput(GLFWwindow *window)
                 depthBox->setValue(val + 1);
         }
         depthUp = true;
-    }if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE) {
+    }if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
         depthUp = false;
-    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
         if (!generatePress)
         {
             generateButton->callback()();
         }
         generatePress = true;
-    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE) {
+    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE)
         generatePress = false;
-    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        if (!hideUiPress)
+        {   
+            if (!hideUi) hideUi = true;
+            else hideUi = false;
+        }
+        hideUiPress = true;
+    }if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
+        hideUiPress = false;
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
