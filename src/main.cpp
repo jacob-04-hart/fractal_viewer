@@ -588,7 +588,7 @@ int main()
             readyToDraw2D = false;
             camera.flat = false;
         }else if (type==6){
-            drawSponge(cubeVert1,cubeVert2,cubeVert3,cubeVert4,cubeVert5,cubeVert6,cubeVert7,cubeVert8,0,vertices);
+            drawSponge(cubeVert1,1,0,vertices);
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
