@@ -578,8 +578,9 @@ void drawLSpongeV2(std::vector<float> one, float length, int depth, std::vector<
 }
 
 void drawJCube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
-    float fifth = length/5;
     if (depth < maxDepth){
+        float scale = (pow(2,.5)-1);
+        float scale2 = (pow(scale,2));
         for (int layer = 0; layer < 3; ++layer)
         {
             for (int row = 0; row < 3; ++row)
@@ -588,9 +589,9 @@ void drawJCube(std::vector<float> one, float length, int depth, std::vector<floa
                 {
                     int count = (layer == 1) + (row == 1) + (col == 1);
                     if ((layer!=1)&&(row!=1)&&(col!=1)) {
-                        drawJCube({one[0] + (3*fifth*row/2), one[1] - (3*fifth*col/2), one[2] + (3*fifth*layer/2)}, 2*fifth, depth + 1, vertices);
+                        drawJCube({one[0] + ((scale+scale2)*length*row/2), one[1] - ((scale+scale2)*length*col/2), one[2] + ((scale+scale2)*length*layer/2)}, scale*length, depth + 1, vertices);
                     } else if (count == 1) {
-                        drawJCube({one[0] + (2*fifth * row), one[1] - (2*fifth * col), one[2] + (2*fifth * layer)}, fifth, depth + 2, vertices);
+                        drawJCube({one[0] + (scale*length*row), one[1] - (scale*length*col), one[2] + (scale*length*layer)}, scale2*length, depth + 2, vertices);
                     }
                     
                 }
