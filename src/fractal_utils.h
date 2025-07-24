@@ -588,7 +588,7 @@ void drawJCube(std::vector<float> one, float length, int depth, std::vector<floa
                 {
                     int count = (layer == 1) + (row == 1) + (col == 1);
                     if ((layer!=1)&&(row!=1)&&(col!=1)) {
-                        drawJCube({one[0] + (3*fifth*row/2), one[1] - (3*fifth*col/2), one[2] + (3*fifth*layer/2)}, one[2] + 2*fifth, depth + 1, vertices);
+                        drawJCube({one[0] + (3*fifth*row/2), one[1] - (3*fifth*col/2), one[2] + (3*fifth*layer/2)}, 2*fifth, depth + 1, vertices);
                     } else if (count == 1) {
                         drawJCube({one[0] + (2*fifth * row), one[1] - (2*fifth * col), one[2] + (2*fifth * layer)}, fifth, depth + 2, vertices);
                     }
