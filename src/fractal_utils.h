@@ -577,6 +577,43 @@ void drawLSpongeV2(std::vector<float> one, float length, int depth, std::vector<
     }
 }
 
+void drawJCube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    float fifth = length/5;
+    if (depth < maxDepth){
+        for (int layer = 0; layer < 3; ++layer)
+        {
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 3; ++col)
+                {
+                    int count = (layer == 1) + (row == 1) + (col == 1);
+                    if ((layer!=1)&&(row!=1)&&(col!=1)) {
+                        drawJCube({one[0] + (3*fifth*row/2), one[1] - (3*fifth*col/2), one[2] + (3*fifth*layer/2)}, 2*fifth, depth + 1, vertices);
+                    } else if (count == 1) {
+                        drawJCube({one[0] + (2*fifth * row), one[1] - (2*fifth * col), one[2] + (2*fifth * layer)}, fifth, depth + 2, vertices);
+                    }
+                    
+                }
+            }
+        }
+    } else {
+        std::vector<float> two = {one[0]+length, one[1], one[2]};
+        std::vector<float> three = {one[0], one[1]-length, one[2]};
+        std::vector<float> four = {one[0]+length, one[1]-length, one[2]};
+        std::vector<float> five = {one[0], one[1], one[2]+length};
+        std::vector<float> six = {one[0]+length, one[1], one[2]+length};
+        std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
+        std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
+
+        drawSquare(one,two,three,four,color1,vertices);
+        drawSquare(six,five,eight,seven,color2,vertices);
+        drawSquare(five,six,one,two,color3,vertices);
+        drawSquare(eight,seven,four,three,color4,vertices);
+        drawSquare(two,six,four,eight,color5,vertices);
+        drawSquare(five,one,seven,three,color6,vertices);
+    }
+}
+
 std::vector<std::vector<std::vector<bool>>> spongeInc = {
     {
         {true,true,true},

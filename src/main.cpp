@@ -154,7 +154,8 @@ int main()
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
                                             "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: 2x2 Cube",
-                                            "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube"};
+                                            "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube",
+                                            "Jerusalem Cube"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -498,7 +499,7 @@ int main()
         type = idx;
         if (type==6||type==8){
             depthBox->setValue(4);
-        } else if (depthBox->value()>3&&(type==9||type==10||type==11||type==12)) {
+        } else if (depthBox->value()>3&&(type==9||type==10||type==11||type==12||type==13)) {
             depthBox->setValue(3);
         }
         params->setVisible(type != 7);
@@ -672,7 +673,12 @@ int main()
             readyToDraw3D = true;
             readyToDraw2D = false;
             camera.flat = false;
-        };
+        }else if (type==13){
+            drawJCube(cubeVert1,1,0,vertices);
+            readyToDraw3D = true;
+            readyToDraw2D = false;
+            camera.flat = false;
+        };;
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
