@@ -883,9 +883,14 @@ int main()
                 }
                 else
                 {
-                    totalRotX = preRotX + rotX*(camera.Zoom/90.0f);
-                    totalRotY = preRotY + rotY*(camera.Zoom/90.0f);
+                    totalRotX = preRotX + rotX;
+                    totalRotY = preRotY + rotY;
                 }
+                float maxAngle = 90.0f;
+                if (totalRotY > maxAngle)
+                    totalRotY = maxAngle;
+                if (totalRotY < -maxAngle)
+                    totalRotY = -maxAngle;
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
                 rotatedModel = glm::rotate(rotatedModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
