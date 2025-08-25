@@ -665,7 +665,7 @@ int main()
                 {
                     for (int col = 0; col < 5; ++col)
                     {
-                        layerInc5[abs(layer-3)][abs(row-3)][abs(col-3)] = !(cubeButtons5[layer][row][col]->pushed());
+                        layerInc5[abs(layer-4)][abs(row-4)][abs(col-4)] = !(cubeButtons5[layer][row][col]->pushed());
                     }
                 }
             }
