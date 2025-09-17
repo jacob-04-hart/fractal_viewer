@@ -909,7 +909,7 @@ int main()
             //mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
 
             float time = glfwGetTime();
-            float cycles = 1.0f + time * 0.3f;
+            float cycles = 1.0f + time * 0.1f;
             mandelShader.setFloat("cycles", cycles);
 
             GLint zoomLoc = glGetUniformLocation(mandelShader.ID, "zoom");
