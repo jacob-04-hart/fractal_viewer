@@ -248,7 +248,7 @@ int main()
     std::vector<std::string> perspectiveOptions = {"None","Corner 1","Corner 2","Corner 3","Corner 4","Corner 5","Corner 6","Corner 7","Corner 8",};
     int perspective = 0;
 
-    new nanogui::Label(params, "Preset Perspectives (Locked)");
+    new nanogui::Label(params, "Preset Perspectives");
     auto *pCombo = new nanogui::ComboBox(params, perspectiveOptions);
     pCombo->setSelectedIndex(perspective);
     pCombo->setFixedWidth(150);
@@ -513,9 +513,24 @@ int main()
         infoBox->setValue(loadTextFile(filename));
     });
 
-    pCombo->setCallback([&perspective](int idx){
-        perspective = idx;
-    });
+    pCombo->setCallback([&perspective, pCombo](int idx)
+                        {
+    perspective = idx;
+    if (perspective != 0) {
+        // Set rotation state to preset
+        struct CornerRotation { float angleY; float angleX; };
+        CornerRotation rotations[9] = {
+            {0.0f, 0.0f}, {45.0f, 35.26f}, {135.0f, 35.26f}, {135.0f, -35.26f},
+            {45.0f, -35.26f}, {-45.0f, 35.26f}, {-135.0f, 35.26f},
+            {-135.0f, -35.26f}, {-45.0f, -35.26f}
+        };
+        preRotX = rotations[perspective].angleY;
+        preRotY = rotations[perspective].angleX;
+        rotX = 0;
+        rotY = 0;
+        perspective = 0; // Switch to user control after setting
+        pCombo->setSelectedIndex(0);
+    } });
 
     nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
     generateButtonContainer->setLayout(new nanogui::BoxLayout(
@@ -824,50 +839,27 @@ int main()
             ourShader.setMat4("view", view);
 
             glm::mat4 model = glm::mat4(1.0f);
-            if(perspective==0){
-                if (isFirstDown)
-                {
-                    totalRotX = preRotX;
-                    totalRotY = preRotY;
-                }
-                else
-                {
-                    totalRotX = preRotX + rotX;
-                    totalRotY = preRotY + rotY;
-                }
 
-                float maxAngle = 90.0f;
-                if (totalRotY > maxAngle)
-                    totalRotY = maxAngle;
-                if (totalRotY < -maxAngle)
-                    totalRotY = -maxAngle;
-
-                model = glm::rotate(model, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
-            } else {
-                struct CornerRotation
-                {
-                    float angleY;
-                    float angleX;
-                };
-
-                CornerRotation rotations[9] = {
-                    {0.0f, 0.0f},              // 0 = none
-                    {45.0f, 35.26f},           // 1: +X +Y +Z
-                    {135.0f, 35.26f},          // 2: -X +Y +Z
-                    {135.0f, -35.26f},         // 3: -X -Y +Z
-                    {45.0f, -35.26f},          // 4: +X -Y +Z
-                    {-45.0f, 35.26f},   // 5: +X +Y -Z
-                    {-135.0f, 35.26f},  // 6: -X +Y -Z
-                    {-135.0f, -35.26f}, // 7: -X -Y -Z
-                    {-45.0f, -35.26f},  // 8: +X -Y -Z
-                };
-                float angleY = rotations[perspective].angleY;
-                float angleX = rotations[perspective].angleX;
-
-                model = glm::rotate(model, glm::radians(angleX), glm::vec3(1.0f, 0.0f, 0.0f));
-                model = glm::rotate(model, glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
+            if (isFirstDown)
+            {
+                totalRotX = preRotX;
+                totalRotY = preRotY;
             }
+            else
+            {
+                totalRotX = preRotX + rotX;
+                totalRotY = preRotY + rotY;
+            }
+
+            float maxAngle = 90.0f;
+            if (totalRotY > maxAngle)
+                totalRotY = maxAngle;
+            if (totalRotY < -maxAngle)
+                totalRotY = -maxAngle;
+
+            model = glm::rotate(model, glm::radians(totalRotY), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
+
             ourShader.setMat4("model", model);
 
             glBindVertexArray(VAO);
