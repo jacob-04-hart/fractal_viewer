@@ -507,7 +507,8 @@ int main()
             depthBox->setValue(4);
         } else if (depthBox->value()>3&&(type==9||type==10||type==11||type==12||type==13)) {
             depthBox->setValue(3);
-        }else if (type==7){
+        }
+        if (type==7){
             vertices = {
                 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -517,7 +518,7 @@ int main()
                 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             camera.flat = true;
-        }
+        } else if (camera.flat=true) vertices.clear();
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
         type9Window->setVisible(type == 8);
