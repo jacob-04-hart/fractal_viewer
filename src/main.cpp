@@ -567,6 +567,7 @@ int main()
         setMaxDepth(depthBox->value());
         generateDone = false;
         generateButton->setEnabled(false);
+        combo->setEnabled(false);
         vertices.clear();
         generateThread = std::thread([&]()
         {
@@ -611,7 +612,7 @@ int main()
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             camera.flat = false;
-        }else if (type==5){
+        }else if (type==5){ // add option to not do some sides
             drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
@@ -682,6 +683,7 @@ int main()
         };
 
         generateButton->setEnabled(true);
+        combo->setEnabled(true);
         generateDone = true; }); });
 
     screen.setVisible(true);
@@ -784,11 +786,14 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        {
+        if (type != 7 ){
             verticesMutex.lock();
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
             verticesMutex.unlock();
+        }else{
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
         }
         if (generateDone && generateThread.joinable())
         {
