@@ -2,6 +2,14 @@
 #include <vector>
 #include <cmath>
 #include <glm/gtx/rotate_vector.hpp>
+#include <mutex>
+std::mutex verticesMutex;
+
+template <typename Func, typename... Args>
+auto with_mutex(Func&& func, Args&&... args) -> decltype(func(std::forward<Args>(args)...)) {
+    std::lock_guard<std::mutex> lock(verticesMutex);
+    return func(std::forward<Args>(args)...);
+}
 
 float splitValue = 10.0f;
 std::vector<float> color1 = {1.0f, 0.0f, 0.0f}; // red
@@ -349,12 +357,12 @@ void drawModular2x2Cube(std::vector<float> one, float length, int depth, std::ve
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -386,12 +394,12 @@ void drawModular3x3Cube(std::vector<float> one, float length, int depth, std::ve
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -422,12 +430,12 @@ void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::ve
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -458,12 +466,12 @@ void drawModular5x5Cube(std::vector<float> one, float length, int depth, std::ve
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -513,12 +521,12 @@ void drawLSponge(std::vector<float> one, float length, int depth, std::vector<fl
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -568,12 +576,12 @@ void drawLSpongeV2(std::vector<float> one, float length, int depth, std::vector<
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -606,12 +614,12 @@ void drawJCube(std::vector<float> one, float length, int depth, std::vector<floa
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -659,12 +667,12 @@ void drawSponge(std::vector<float> one, float length, int depth, std::vector<flo
         std::vector<float> seven = {one[0], one[1]-length, one[2]+length};
         std::vector<float> eight = {one[0]+length, one[1]-length, one[2]+length};
 
-        drawSquare(one,two,three,four,color1,vertices);
-        drawSquare(six,five,eight,seven,color2,vertices);
-        drawSquare(five,six,one,two,color3,vertices);
-        drawSquare(eight,seven,four,three,color4,vertices);
-        drawSquare(two,six,four,eight,color5,vertices);
-        drawSquare(five,one,seven,three,color6,vertices);
+        with_mutex(drawSquare,one,two,three,four,color1,vertices);
+        with_mutex(drawSquare,six,five,eight,seven,color2,vertices);
+        with_mutex(drawSquare,five,six,one,two,color3,vertices);
+        with_mutex(drawSquare,eight,seven,four,three,color4,vertices);
+        with_mutex(drawSquare,two,six,four,eight,color5,vertices);
+        with_mutex(drawSquare,five,one,seven,three,color6,vertices);
     }
 }
 
@@ -704,49 +712,113 @@ void drawModularTetrahedron(std::vector<float> a, std::vector<float> b, std::vec
             drawModularTetrahedron(point4,point8,point9,point10,depth+1,vertices);
         }
         if (drawOcta){
-            drawTriangle(point2,point6,point3,vertices,color1);
-            drawTriangle(point4,point9,point8,vertices,color1);
-            drawTriangle(point4,point8,point2,vertices,color2);
-            drawTriangle(point3,point6,point9,vertices,color2);
-            drawTriangle(point3,point9,point4,vertices,color3);
-            drawTriangle(point2,point8,point6,vertices,color3);
-            drawTriangle(point4,point2,point3,vertices,color4);
-            drawTriangle(point6,point8,point9,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2, point6, point3, vertices, color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point9,point8,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point8,point2,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point6,point9,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point9,point4,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point8,point6,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point2,point3,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point6,point8,point9,vertices,color4);
         }
     } else {
         if (drawTet1) {
-            drawTriangle(point1,point2,point3,vertices,color1);
-            drawTriangle(point1,point4,point2,vertices,color2);
-            drawTriangle(point1,point3,point4,vertices,color3);
-            drawTriangle(point2,point4,point3,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point1,point2,point3,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point1,point4,point2,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point1,point3,point4,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point4,point3,vertices,color4);
         }
         if (drawTet2) {
-            drawTriangle(point2,point5,point6,vertices,color1);
-            drawTriangle(point2,point8,point5,vertices,color2);
-            drawTriangle(point2,point6,point8,vertices,color3);
-            drawTriangle(point5,point8,point6,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point5,point6,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point8,point5,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point6,point8,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point5,point8,point6,vertices,color4);
         }
         if (drawTet3) {
-            drawTriangle(point3,point6,point7,vertices,color1);
-            drawTriangle(point3,point9,point6,vertices,color2);
-            drawTriangle(point3,point7,point9,vertices,color3);
-            drawTriangle(point6,point9,point7,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point6,point7,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point9,point6,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point7,point9,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point6,point9,point7,vertices,color4);
         }
         if (drawTet4) {
-            drawTriangle(point4,point8,point9,vertices,color1);
-            drawTriangle(point4,point10,point8,vertices,color2);
-            drawTriangle(point4,point9,point10,vertices,color3);
-            drawTriangle(point8,point10,point9,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point8,point9,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point10,point8,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point9,point10,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point8,point10,point9,vertices,color4);
         }
         if (drawOcta){
-            drawTriangle(point2,point6,point3,vertices,color1);
-            drawTriangle(point4,point9,point8,vertices,color1);
-            drawTriangle(point4,point8,point2,vertices,color2);
-            drawTriangle(point3,point6,point9,vertices,color2);
-            drawTriangle(point3,point9,point4,vertices,color3);
-            drawTriangle(point2,point8,point6,vertices,color3);
-            drawTriangle(point4,point2,point3,vertices,color4);
-            drawTriangle(point6,point8,point9,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point6,point3,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point9,point8,vertices,color1);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point8,point2,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point6,point9,vertices,color2);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point3,point9,point4,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point2,point8,point6,vertices,color3);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point4,point2,point3,vertices,color4);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, point6,point8,point9,vertices,color4);
         }
     }
 }
@@ -768,7 +840,7 @@ void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, 
         drawK2D4(b,top,bottom,newT2,newBot2,depth+1,vertices,f1,color4,b1,b2,color4,f2);
         drawK2D4(c,bottom,top,newT3,newBot3,depth+1,vertices,b3,color4,f3,b2,color4,f2);
     } else {
-        draw2D4(a,b,c,top,bottom,vertices,f1,f2,f3,b1,b2,b3);
+        with_mutex(draw2D4,a,b,c,top,bottom,vertices,f1,f2,f3,b1,b2,b3);
     }
 }
 
@@ -821,15 +893,23 @@ void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
         }
         else
         {
-            drawTriangle(a, mid2, mid1, vertices);
-            drawTriangle(b, mid3, mid2, vertices);
-            drawTriangle(c, mid1, mid3, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, mid2, mid1, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, b, mid3, mid2, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, c, mid1, mid3, vertices);
         }
         //drawTriangle(mid1, mid2, mid3, vertices);
     }
     else
     {
-        drawTriangle(a, b, c, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, b, c, vertices);
     }
 }
 
@@ -883,15 +963,25 @@ void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
         }
         else
         {
-            drawTriangle(a, mid2, mid1, vertices);
-            drawTriangle(b, mid3, mid2, vertices);
-            drawTriangle(c, mid1, mid3, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, mid2, mid1, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, b, mid3, mid2, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, c, mid1, mid3, vertices);
         }
-        drawTriangle(mid1, mid2, mid3, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, mid1, mid2, mid3, vertices);
     }
     else
     {
-        drawTriangle(a, b, c, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, b, c, vertices);
     }
 };
 
@@ -944,15 +1034,25 @@ void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
         }
         else
         {
-            drawTriangle(a, mid2, mid1, vertices);
-            drawTriangle(b, mid3, mid2, vertices);
-            drawTriangle(c, mid1, mid3, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, mid2, mid1, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, b, mid3, mid2, vertices);
+            with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, c, mid1, mid3, vertices);
         }
-        drawTriangle(mid1, mid2, mid3, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, mid1, mid2, mid3, vertices);
     }
     else
     {
-        drawTriangle(a, b, c, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, b, c, vertices);
     }
 };
 
@@ -995,7 +1095,9 @@ void drawST(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
     }
     else
     {
-        drawTriangle(a, b, c, vertices);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, a, b, c, vertices);
     }
 }
 
@@ -1026,8 +1128,12 @@ void drawInverseST(std::vector<float> a, std::vector<float> b, std::vector<float
     std::vector<float> rotated2 = rotateAroundAxis(inner2, center, n, angle);
     std::vector<float> rotated3 = rotateAroundAxis(inner3, center, n, angle);
 
-    drawTriangle(mid1, mid2, mid3, vertices);
-    drawTriangle(rotated1, rotated3, rotated2, vertices);
+    with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, mid1, mid2, mid3, vertices);
+    with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts) {
+                drawTriangle(a, b, c, verts);
+            }, rotated1, rotated3, rotated2, vertices);
     if (depth < maxDepth)
     {
         drawInverseST(a, mid1, mid3, depth + 1, vertices);

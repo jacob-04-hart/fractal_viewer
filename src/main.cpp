@@ -12,6 +12,7 @@
 #include "camera.h"
 
 #include <iostream>
+#include <thread>
 #include <cmath>
 #include <vector>
 
@@ -24,6 +25,8 @@
 
 #include <fstream>
 #include <sstream>
+
+#include <mutex>
 
 std::string loadTextFile(const std::string& path) {
     std::ifstream file(path);
@@ -75,6 +78,9 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 unsigned int initialMaxDepth = 6; // change this to either save or set fire to your computer
+
+bool generateDone = true;
+std::thread generateThread;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -146,9 +152,6 @@ int main()
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-
-    bool readyToDraw3D = false;
-    bool readyToDraw2D = false;
 
     int type = 0;
     int renderedType = 0;
@@ -234,6 +237,9 @@ int main()
     depthBox->setMaxValue(15);
     depthBox->setFormat("[0-9]*");
     depthBox->setFixedWidth(60);
+    depthBox->setCallback([&](int value) {
+        setMaxDepth(value);
+    });
 
     nanogui::Widget *perspectiveBoxContainer = new nanogui::Widget(params);
     perspectiveBoxContainer->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal,
@@ -495,12 +501,22 @@ int main()
         infoWindow->setVisible(false); 
     });
 
-    combo->setCallback([&type, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
+    combo->setCallback([&type, &vertices, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
         type = idx;
         if (type==6||type==8){
             depthBox->setValue(4);
         } else if (depthBox->value()>3&&(type==9||type==10||type==11||type==12||type==13)) {
             depthBox->setValue(3);
+        }else if (type==7){
+            vertices = {
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+            camera.flat = true;
         }
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
@@ -540,9 +556,20 @@ int main()
 
     generateButton = new nanogui::Button(generateButtonContainer, "Generate");
     generateButton->setFixedWidth(240);
+    
+    generateThread = std::thread();
 
-    generateButton->setCallback([&]() {
+    generateButton->setCallback([&]()
+                                { 
+        if (!generateDone) return;
+        if (generateThread.joinable()) generateThread.join();
+        renderedType = type; 
         setMaxDepth(depthBox->value());
+        generateDone = false;
+        generateButton->setEnabled(false);
+        vertices.clear();
+        generateThread = std::thread([&]()
+        {
         nanogui::Color c1 = colorWheel1->color();
         color1 = {c1.r(), c1.g(), c1.b()};
         nanogui::Color c2 = colorWheel2->color();
@@ -555,76 +582,47 @@ int main()
         color5 = {c5.r(), c5.g(), c5.b()};
         nanogui::Color c6 = colorWheel6->color();
         color6 = {c6.r(), c6.g(), c6.b()};
-        vertices.clear();
         if (type==0){
             d4Top.at(2) = -(thicknessBox->value()/2);
             d4Bottom.at(2) = thicknessBox->value()/2;
             drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,d4Top,d4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         } else if (type==1){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT2(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT2(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         } else if (type==2){
             drawKT3(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT3(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==3){
             drawST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==4){
             drawInverseST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==5){
             drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==6){
             drawSponge(cubeVert1,1,0,vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
-        }else if (type==7){
-            vertices = {
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-
-                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-            readyToDraw2D = true;
-            readyToDraw3D = false;
-            camera.flat = true;
         }else if (type==8){
             if (!experimentalBox->checked()) drawLSponge(cubeVert1,1,0,vertices);
             else drawLSpongeV2(cubeVert1,1,0,vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==9){
             for (int layer = 0; layer < 2; ++layer)
@@ -638,9 +636,6 @@ int main()
                 }
             }
             drawModular2x2Cube(cubeVert1,1,0,vertices);
-
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==10){ // takes up way more lines than needed but i'm too lazy
             for (int layer = 0; layer < 3; ++layer)
@@ -654,9 +649,6 @@ int main()
                 }
             }
             drawModular3x3Cube(cubeVert1,1,0,vertices);
-
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==11){
             for (int layer = 0; layer < 4; ++layer)
@@ -670,8 +662,6 @@ int main()
                 }
             }
             drawModular4x4Cube(cubeVert1,1,0,vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==12){
             for (int layer = 0; layer < 5; ++layer)
@@ -685,21 +675,14 @@ int main()
                 }
             }
             drawModular5x5Cube(cubeVert1,1,0,vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
         }else if (type==13){
             drawJCube(cubeVert1,1,0,vertices);
-            readyToDraw3D = true;
-            readyToDraw2D = false;
             camera.flat = false;
-        };;
+        };
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-        renderedType = type;
-    });
+        generateButton->setEnabled(true);
+        generateDone = true; }); });
 
     screen.setVisible(true);
     screen.performLayout();
@@ -800,7 +783,19 @@ int main()
     nanogui::Color c7 = colorWheel7->color();
 
     while (!glfwWindowShouldClose(window))
-    {   
+    {
+        {
+            verticesMutex.lock();
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+            verticesMutex.unlock();
+        }
+        if (generateDone && generateThread.joinable())
+        {
+            generateThread.join();
+            renderedType = type;
+        }
+
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         SCR_WIDTH = width;
@@ -817,7 +812,26 @@ int main()
         glClearColor(color7[0], color7[1], color7[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        if (readyToDraw3D) {
+        if(type==7) {
+            mandelShader.use();
+            mandelShader.setInt("maxItr",200);
+            //for possible user choice coloring
+            //mandelShader.setVec3("color1", glm::vec3(color1[0], color1[1], color1[2]));
+            //mandelShader.setVec3("color2", glm::vec3(color2[0], color2[1], color2[2]));
+            //mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
+
+            float time = glfwGetTime();
+            float cycles = 1.0f + time * 0.1f;
+            mandelShader.setFloat("cycles", cycles);
+
+            GLint zoomLoc = glGetUniformLocation(mandelShader.ID, "zoom");
+            GLint offsetLoc = glGetUniformLocation(mandelShader.ID, "offset");
+            glUniform1d(zoomLoc, camera.mandelbrotZoom);
+            glUniform2d(offsetLoc, camera.mandelbrotOffset.x, camera.mandelbrotOffset.y);
+
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
+        } else {
             ourShader.use();
             ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
             ourShader.setVec3("lightPos", lightPos);
@@ -861,10 +875,10 @@ int main()
             model = glm::rotate(model, glm::radians(totalRotX), glm::vec3(0.0f, 1.0f, 0.0f));
 
             ourShader.setMat4("model", model);
-
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
-
+            if (vertices.size() >= 9) {
+                glBindVertexArray(VAO);
+                glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
+            }
             if (renderedType == 1)
             {
                 glm::mat4 rotatedModel = glm::mat4(1.0f);
@@ -892,25 +906,6 @@ int main()
                 glBindVertexArray(VAO);
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
             }
-        } else if(readyToDraw2D) {
-            mandelShader.use();
-            mandelShader.setInt("maxItr",200);
-            //for possible user choice coloring
-            //mandelShader.setVec3("color1", glm::vec3(color1[0], color1[1], color1[2]));
-            //mandelShader.setVec3("color2", glm::vec3(color2[0], color2[1], color2[2]));
-            //mandelShader.setVec3("color3", glm::vec3(color3[0], color3[1], color3[2]));
-
-            float time = glfwGetTime();
-            float cycles = 1.0f + time * 0.1f;
-            mandelShader.setFloat("cycles", cycles);
-
-            GLint zoomLoc = glGetUniformLocation(mandelShader.ID, "zoom");
-            GLint offsetLoc = glGetUniformLocation(mandelShader.ID, "offset");
-            glUniform1d(zoomLoc, camera.mandelbrotZoom);
-            glUniform2d(offsetLoc, camera.mandelbrotOffset.x, camera.mandelbrotOffset.y);
-
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
         }
         if (!hideUi) {
             screen.drawContents();
@@ -1105,14 +1100,8 @@ void processInput(GLFWwindow *window)
     }if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
         depthUp = false;
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-        if (!generatePress)
-        {
             generateButton->callback()();
-        }
-        generatePress = true;
-    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE)
-        generatePress = false;
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+    }if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         if (!hideUiPress)
         {   
             if (!hideUi) hideUi = true;
