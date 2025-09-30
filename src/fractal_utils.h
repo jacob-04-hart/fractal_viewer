@@ -67,6 +67,14 @@ const std::vector<float> cubeVert6 = {.5f,.5f,.5f};
 const std::vector<float> cubeVert7 = {-.5f,-.5f,.5f};
 const std::vector<float> cubeVert8 = {.5f,-.5f,.5f};
 
+// octahedron vertices
+const std::vector<float> octVert1 = {0,1,0};
+const std::vector<float> octVert2 = {0,0,1};
+const std::vector<float> octVert3 = {-1,0,0};
+const std::vector<float> octVert4 = {0,0,-1};
+const std::vector<float> octVert5 = {1,0,0};
+const std::vector<float> octVert6 = {0,-1,0};
+
 void setMaxDepth(int depth)
 {
     maxDepth = depth;
@@ -208,6 +216,43 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
     vertices.insert(vertices.end(), c.begin(), c.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
     vertices.insert(vertices.end(), n.begin(), n.end());
+}
+
+void drawHedron(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> d, std::vector<float> e, std::vector<float> f, int depth, std::vector<float> &vertices)
+{
+    if(depth<maxDepth){
+        drawHedron(a,midpoint(a,b),midpoint(a,c),midpoint(a,d),midpoint(a,e),midpoint(a,f),depth+1,vertices);
+        drawHedron(midpoint(b,a),b,midpoint(b,c),midpoint(b,d),midpoint(b,e),midpoint(b,f),depth+1,vertices);
+        drawHedron(midpoint(c,a),midpoint(c,b),c,midpoint(c,d),midpoint(c,e),midpoint(c,f),depth+1,vertices);
+        drawHedron(midpoint(d,a),midpoint(d,b),midpoint(d,c),d,midpoint(d,e),midpoint(d,f),depth+1,vertices);
+        drawHedron(midpoint(e,a),midpoint(e,b),midpoint(e,c),midpoint(e,d),e,midpoint(e,f),depth+1,vertices);
+        drawHedron(midpoint(f,a),midpoint(f,b),midpoint(f,c),midpoint(f,d),midpoint(f,e),f,depth+1,vertices);
+    }else{
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, a, b, c, vertices, color1);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, a, c, d, vertices, color2);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, a, d, e, vertices, color3);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, a, e, b, vertices, color4);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, f, e, d, vertices, color1);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, f, b, e, vertices, color2);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, f, c, b, vertices, color3);
+        with_mutex([&](std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float>& verts, std::vector<float> col) {
+                drawTriangle(a, b, c, verts, col);
+            }, f, d, c, vertices, color4);
+    }
 }
 
 void draw2D4(const std::vector<float>& a, const std::vector<float>& b, const std::vector<float>& c, const std::vector<float>& top, const std::vector<float>& bottom,

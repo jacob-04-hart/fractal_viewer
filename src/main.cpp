@@ -158,7 +158,7 @@ int main()
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
                                             "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: 2x2 Cube",
                                             "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube",
-                                            "Jerusalem Cube"};
+                                            "Jerusalem Cube", "Octahedron"};
 
     nanogui::ref<nanogui::Window> mainWindow = new nanogui::Window(&screen, "Fractal Controls");
     mainWindow->setPosition(Eigen::Vector2i(10, 10));
@@ -681,7 +681,10 @@ int main()
         }else if (type==13){
             drawJCube(cubeVert1,1,0,vertices);
             camera.flat = false;
-        };
+        }else if (type==14) {
+            drawHedron(octVert1,octVert2,octVert3,octVert4,octVert5,octVert6,0,vertices);
+            camera.flat = false;
+        }
 
         generateButton->setEnabled(true);
         combo->setEnabled(true);
