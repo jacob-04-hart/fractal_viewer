@@ -154,7 +154,7 @@ int main()
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-
+//----------------------------------------------------------------------userinterface----------------------------------------------------------------------
     int type = 0;
     int renderedType = 0;
     std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
@@ -565,7 +565,7 @@ int main()
     generateButton->setFixedWidth(240);
     
     generateThread = std::thread();
-//------------------------------------------------------------GENERATOR-CALLBACK----------------------------------------------------------
+//------------------------------------------------------------generatecallback----------------------------------------------------------
     generateButton->setCallback([&]()
                                 { 
         if (generateThread.joinable()&&!generateDone){
@@ -801,7 +801,7 @@ int main()
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     nanogui::Color c7 = colorWheel7->color();
-
+//------------------------------------------------------------------renderloop--------------------------------------------------------
     while (!glfwWindowShouldClose(window))
     {
         if (type != 7 ){
@@ -981,7 +981,7 @@ int main()
     glfwTerminate();
     return 0;
 }
-
+//---------------------------------------------------------------inputs------------------------------------------------------------------------
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
     if (g_screen && g_screen->mouseButtonCallbackEvent(button, action, mods)) {
         return; // Event handled by NanoGUI
