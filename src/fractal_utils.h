@@ -3,7 +3,14 @@
 #include <cmath>
 #include <glm/gtx/rotate_vector.hpp>
 #include <mutex>
+#include <atomic>
+
+extern std::atomic<bool> generateCancel;
 std::mutex verticesMutex;
+
+inline bool cancelRequested() {
+    return generateCancel.load();
+}
 
 template <typename Func, typename... Args>
 auto with_mutex(Func&& func, Args&&... args) -> decltype(func(std::forward<Args>(args)...)) {
@@ -177,6 +184,7 @@ const std::vector<float> d4BottomNormal3 = normal(d4Bottom,eqTVertex1,eqTVertex3
 
 void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     std::vector<float> n = unnormalizedNormal(a, b, c);
 
     const std::vector<std::vector<float>> faceNormals = {normal1, normal2, normal3, normal4};
@@ -206,6 +214,7 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
     vertices.insert(vertices.end(), n.begin(), n.end());
 }
 void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> &vertices, std::vector<float> color){
+    if (cancelRequested()) return;
     const std::vector<float> n = unnormalizedNormal(a,c,b);
     vertices.insert(vertices.end(), a.begin(), a.end());
     vertices.insert(vertices.end(), color.begin(), color.end());
@@ -220,6 +229,7 @@ void drawTriangle(std::vector<float> a, std::vector<float> b, std::vector<float>
 
 void drawHedron(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> d, std::vector<float> e, std::vector<float> f, int depth, std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if(depth<maxDepth){
         drawHedron(a,midpoint(a,b),midpoint(a,c),midpoint(a,d),midpoint(a,e),midpoint(a,f),depth+1,vertices);
         drawHedron(midpoint(b,a),b,midpoint(b,c),midpoint(b,d),midpoint(b,e),midpoint(b,f),depth+1,vertices);
@@ -260,6 +270,7 @@ void draw2D4(const std::vector<float>& a, const std::vector<float>& b, const std
         std::vector<float> f1, std::vector<float> f2, std::vector<float> f3,
         std::vector<float> b1, std::vector<float> b2, std::vector<float> b3) 
 {
+    if (cancelRequested()) return;
     assert(f1.size() == 3 && f2.size() == 3 && f3.size() == 3);
     assert(b1.size() == 3 && b2.size() == 3 && b3.size() == 3);
 
@@ -351,6 +362,7 @@ std::vector<float> thirdSplit(const std::vector<float>& a, const std::vector<flo
 
 void drawSquare(std::vector<float> a,std::vector<float> b,std::vector<float> c,std::vector<float> d,std::vector<float> color,std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     std::vector<float> n = unnormalizedNormal(a, b, c);
 
     vertices.insert(vertices.end(), a.begin(), a.end());
@@ -377,6 +389,7 @@ void drawSquare(std::vector<float> a,std::vector<float> b,std::vector<float> c,s
 std::vector<std::vector<std::vector<bool>>> layerInc2(2, std::vector<std::vector<bool>>(2, std::vector<bool>(2, true)));
 
 void drawModular2x2Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     float half = length/2;
     if (depth < maxDepth){
         for (int layer = 0; layer < 2; ++layer)
@@ -414,6 +427,7 @@ void drawModular2x2Cube(std::vector<float> one, float length, int depth, std::ve
 std::vector<std::vector<std::vector<bool>>> layerInc3(3, std::vector<std::vector<bool>>(3, std::vector<bool>(3, true)));
 
 void drawModular3x3Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     float third = length/3;
     if (depth < maxDepth){
         for (int layer = 0; layer < 3; ++layer)
@@ -450,6 +464,7 @@ void drawModular3x3Cube(std::vector<float> one, float length, int depth, std::ve
 
 std::vector<std::vector<std::vector<bool>>> layerInc4(4, std::vector<std::vector<bool>>(4, std::vector<bool>(4, true)));
 void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     float fourth = length/4;
     if (depth < maxDepth){
         for (int layer = 0; layer < 4; ++layer)
@@ -486,6 +501,7 @@ void drawModular4x4Cube(std::vector<float> one, float length, int depth, std::ve
 
 std::vector<std::vector<std::vector<bool>>> layerInc5(5, std::vector<std::vector<bool>>(5, std::vector<bool>(5, true)));
 void drawModular5x5Cube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     float fifth = length/5;
     if (depth < maxDepth){
         for (int layer = 0; layer < 5; ++layer)
@@ -522,6 +538,7 @@ void drawModular5x5Cube(std::vector<float> one, float length, int depth, std::ve
 
 void drawLSponge(std::vector<float> one, float length, int depth, std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         float fourth = length/4;
@@ -577,6 +594,7 @@ void drawLSponge(std::vector<float> one, float length, int depth, std::vector<fl
 
 void drawLSpongeV2(std::vector<float> one, float length, int depth, std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         float fourth = length/4;
@@ -631,6 +649,7 @@ void drawLSpongeV2(std::vector<float> one, float length, int depth, std::vector<
 }
 
 void drawJCube(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     if (depth < maxDepth){
         float scale = (pow(2,.5)-1);
         float scale2 = (pow(scale,2));
@@ -687,6 +706,7 @@ std::vector<std::vector<std::vector<bool>>> spongeInc = {
 };
 
 void drawSponge(std::vector<float> one, float length, int depth, std::vector<float> &vertices){
+    if (cancelRequested()) return;
     float third = length/3;
     if (depth < maxDepth){
         for (int layer = 0; layer < 3; ++layer)
@@ -733,6 +753,7 @@ bool incTet3 = true;
 bool incTet4 = true;
 
 void drawModularTetrahedron(std::vector<float> a, std::vector<float> b, std::vector<float> c, std::vector<float> d, int depth, std::vector<float> &vertices) {
+    if (cancelRequested()) return;
     std::vector<float> point1 = a;
     std::vector<float> point2 = midpoint(a, b);
     std::vector<float> point3 = midpoint(a, c);
@@ -872,6 +893,7 @@ void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, 
             std::vector<float> f1, std::vector<float> f2, std::vector<float> f3,
             std::vector<float> b1, std::vector<float> b2, std::vector<float> b3) 
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         std::vector<float> newT1 = split(a,b);
@@ -892,6 +914,7 @@ void drawK2D4(std::vector<float> a, std::vector<float> b, std::vector<float> c, 
 void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         std::vector<float> mid1 = midpoint(c, a);
@@ -961,6 +984,7 @@ void drawKT(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
 void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         std::vector<float> mid1 = midpoint(c, a);
@@ -1033,6 +1057,7 @@ void drawKT2(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
 void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         std::vector<float> mid1 = midpoint(c, a);
@@ -1105,6 +1130,7 @@ void drawKT3(std::vector<float> a, std::vector<float> b, std::vector<float> c, i
 void drawST(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     if (depth < maxDepth)
     {
         std::vector<float> mid1 = midpoint(a, b);
@@ -1149,6 +1175,7 @@ void drawST(std::vector<float> a, std::vector<float> b, std::vector<float> c, in
 void drawInverseST(std::vector<float> a, std::vector<float> b, std::vector<float> c, int depth,
             std::vector<float> &vertices)
 {
+    if (cancelRequested()) return;
     std::vector<float> mid1 = midpoint(a, b);
     std::vector<float> mid2 = midpoint(b, c);
     std::vector<float> mid3 = midpoint(c, a);

@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include <mutex>
+#include <atomic>
 
 std::string loadTextFile(const std::string& path) {
     std::ifstream file(path);
@@ -81,6 +82,7 @@ unsigned int initialMaxDepth = 6; // change this to either save or set fire to y
 
 bool generateDone = true;
 std::thread generateThread;
+std::atomic<bool> generateCancel{false};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -500,7 +502,7 @@ int main()
     closeButton->setCallback([&infoWindow](){
         infoWindow->setVisible(false); 
     });
-
+//---------------------------------------------------------------------------------------------combocallback----------------------------------------------------------------------------
     combo->setCallback([&type, &vertices, params, infoBox, &type1Window, &type9Window, &type10Window, &type11Window, &type12Window, &type13Window](int idx){ 
         type = idx;
         if (type==6||type==8){
@@ -509,6 +511,7 @@ int main()
             depthBox->setValue(3);
         }
         if (type==7){
+            generateButton->setVisible(false);
             vertices = {
                 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -518,7 +521,10 @@ int main()
                 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             camera.flat = true;
-        } else if (camera.flat=true) vertices.clear();
+        } else if (camera.flat=true) {
+        generateButton->setVisible(true); 
+        vertices.clear();
+        }
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
         type9Window->setVisible(type == 8);
@@ -559,15 +565,22 @@ int main()
     generateButton->setFixedWidth(240);
     
     generateThread = std::thread();
-
+//------------------------------------------------------------GENERATOR-CALLBACK----------------------------------------------------------
     generateButton->setCallback([&]()
                                 { 
-        if (!generateDone) return;
-        if (generateThread.joinable()) generateThread.join();
+        if (generateThread.joinable()&&!generateDone){
+            generateButton->setCaption("Generate");
+            generateCancel.store(true);
+            generateThread.join();
+            return;
+        }else if (generateThread.joinable()) generateThread.join();
+
+        generateCancel.store(false);
         renderedType = type; 
         setMaxDepth(depthBox->value());
         generateDone = false;
-        generateButton->setEnabled(false);
+        // generateButton->setEnabled(false);
+        generateButton->setCaption("Bail");
         combo->setEnabled(false);
         vertices.clear();
         generateThread = std::thread([&]()
@@ -686,8 +699,9 @@ int main()
             camera.flat = false;
         }
 
-        generateButton->setEnabled(true);
+        // generateButton->setEnabled(true);
         combo->setEnabled(true);
+        generateButton->setCaption("Generate");
         generateDone = true; }); });
 
     screen.setVisible(true);
@@ -1109,7 +1123,14 @@ void processInput(GLFWwindow *window)
     }if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
         depthUp = false;
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+        if (!generatePress){
             generateButton->callback()();
+            generatePress = true;
+        }
+    }if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_RELEASE){
+        if (generatePress){
+            generatePress = false;
+        }
     }if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         if (!hideUiPress)
         {   
