@@ -29,6 +29,8 @@
 #include <mutex>
 #include <atomic>
 
+#include "nfd.h"
+
 std::string loadTextFile(const std::string& path) {
     std::ifstream file(path);
     std::stringstream buffer;
@@ -563,6 +565,21 @@ int main()
 
     generateButton = new nanogui::Button(generateButtonContainer, "Generate");
     generateButton->setFixedWidth(240);
+
+    nanogui::Button *testDialogButton = new nanogui::Button(generateButtonContainer, "Test Dialog");
+    testDialogButton->setFixedWidth(110);
+    testDialogButton->setCallback([&]() {
+        nfdchar_t *outPath = NULL;
+        nfdresult_t result = NFD_OpenDialog("txt", NULL, &outPath);
+        if (result == NFD_OKAY) {
+            std::cout << "Selected file: " << outPath << std::endl;
+            free(outPath);
+        } else if (result == NFD_CANCEL) {
+            std::cout << "Dialog cancelled" << std::endl;
+        } else {
+            std::cerr << "NFD error opening dialog" << std::endl;
+        }
+    });
     
     generateThread = std::thread();
 //------------------------------------------------------------generatecallback----------------------------------------------------------
