@@ -15,6 +15,8 @@
 #include <thread>
 #include <cmath>
 #include <vector>
+#include <array>
+#include <iomanip>
 
 #include <nanogui/nanogui.h>
 #include <nanogui/textbox.h>
@@ -29,13 +31,192 @@
 #include <mutex>
 #include <atomic>
 
-#include "nfd.h"
+extern "C" {
+#include "tinyfiledialogs.h"
+}
+#include <stdio.h>
+#include <stdlib.h>
+#include <locale>
+#include <codecvt>
+#include <filesystem>
 
 std::string loadTextFile(const std::string& path) {
     std::ifstream file(path);
     std::stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
+}
+
+// File dialog tester
+std::string openFile(const std::string &baseDir = ".") {
+    std::cout << "openFile() called\n";
+    const char *path = tinyfd_openFileDialog("Open file", NULL, 0, NULL, NULL, 0);
+    if (!path) {
+        std::cout << "Dialog cancelled or error\n";
+        return std::string();
+    }
+    std::string absPath(path);
+    std::cout << "Selected file (abs): " << absPath << "\n";
+
+    namespace fs = std::filesystem;
+    try {
+        fs::path p = fs::u8path(absPath);
+        fs::path base = fs::u8path(baseDir);
+        fs::path rel = fs::relative(p, base); // may throw if not supported
+        std::string rels = rel.generic_string();
+        std::cout << "Relative: " << rels << "\n";
+        return rels;
+    } catch (const std::exception &e) {
+        // fallback: compute relative by string prefix if possible
+        try {
+            fs::path ap = fs::absolute(fs::path(absPath)).lexically_normal();
+            fs::path bp = fs::absolute(fs::path(baseDir)).lexically_normal();
+            std::string a = ap.string();
+            std::string b = bp.string();
+            if (a.rfind(b, 0) == 0) { // a starts with b
+                std::string rel = a.substr(b.size());
+                if (!rel.empty() && (rel[0] == '/' || rel[0] == '\\')) rel.erase(0, 1);
+                std::cout << "Relative (fallback): " << rel << "\n";
+                return rel;
+            }
+        } catch (...) {}
+    }
+
+    // if we can't make a relative path, return the absolute path
+    return absPath;
+}
+
+static bool saveVerticesOBJ(const std::string &path, const std::vector<float> &verts, int fractalType = -1) {
+    std::ofstream out(path);
+    if (!out) return false;
+    // write fractal type as a comment so we can restore it later
+    if (fractalType >= 0) {
+        out << "# fractal_type " << fractalType << "\n";
+    }
+    out << "# OBJ exported by fractal_viewer\n";
+    size_t nVert = verts.size() / 9;
+    out << std::fixed << std::setprecision(6);
+    for (size_t i = 0; i < nVert; ++i) {
+        size_t idx = i * 9;
+        out << "v " << verts[idx+0] << " " << verts[idx+1] << " " << verts[idx+2];
+        out << " " << verts[idx+3] << " " << verts[idx+4] << " " << verts[idx+5];
+        out << "\n";
+    }
+    for (size_t i = 0; i < nVert; ++i) {
+        size_t idx = i * 9;
+        out << "vn " << verts[idx+6] << " " << verts[idx+7] << " " << verts[idx+8] << "\n";
+    }
+    size_t triCount = nVert / 3;
+    for (size_t t = 0; t < triCount; ++t) {
+        int a = static_cast<int>(t * 3 + 1);
+        int b = static_cast<int>(t * 3 + 2);
+        int c = static_cast<int>(t * 3 + 3);
+        out << "f "
+            << a << "//" << a << " "
+            << b << "//" << b << " "
+            << c << "//" << c << "\n";
+    }
+    return out.good();
+}
+
+// modify loader to optionally return the stored type via outType pointer
+static bool loadOBJtoVertices(const std::string &path, std::vector<float> &outVerts, int *outType = nullptr)
+{
+    std::ifstream in(path);
+    if (!in) return false;
+
+    if (outType) *outType = -1;
+
+    std::vector<std::array<float,3>> positions;
+    std::vector<std::array<float,3>> normals;
+    std::vector<std::array<float,3>> colors;
+    std::string line;
+
+    while (std::getline(in, line)) {
+        if (line.empty()) continue;
+        // check for our custom fractal type comment
+        if (line[0] == '#') {
+            const std::string key = "# fractal_type ";
+            if (line.rfind(key, 0) == 0) {
+                try {
+                    int t = std::stoi(line.substr(key.size()));
+                    if (outType) *outType = t;
+                } catch (...) {}
+            }
+            continue; // skip comment lines
+        }
+
+        std::istringstream iss(line);
+        std::string tok;
+        iss >> tok;
+        if (tok == "v") {
+            std::array<float,3> pos = {0,0,0};
+            iss >> pos[0] >> pos[1] >> pos[2];
+            positions.push_back(pos);
+            std::array<float,3> col = {1.0f,1.0f,1.0f};
+            if (!(iss >> col[0] >> col[1] >> col[2])) {}
+            colors.push_back(col);
+        } else if (tok == "vn") {
+            std::array<float,3> n = {0,0,0};
+            iss >> n[0] >> n[1] >> n[2];
+            normals.push_back(n);
+        } else if (tok == "f") {
+            std::vector<int> vIdx;
+            std::vector<int> vnIdx;
+            std::string comp;
+            while (iss >> comp) {
+                int vi = 0, vni = 0;
+                size_t p1 = comp.find('/');
+                if (p1 == std::string::npos) {
+                    vi = std::stoi(comp);
+                } else {
+                    size_t p2 = comp.find('/', p1 + 1);
+                    if (p2 == std::string::npos) {
+                        vi = std::stoi(comp.substr(0, p1));
+                    } else {
+                        vi = std::stoi(comp.substr(0, p1));
+                        if (p2 == p1 + 1) {
+                            vni = std::stoi(comp.substr(p2 + 1));
+                        } else {
+                            vni = std::stoi(comp.substr(p2 + 1));
+                        }
+                    }
+                }
+                vIdx.push_back(vi);
+                vnIdx.push_back(vni);
+            }
+            if (vIdx.size() >= 3) {
+                for (size_t k = 1; k + 1 < vIdx.size(); ++k) {
+                    int idxs[3] = { vIdx[0], vIdx[k], vIdx[k+1] };
+                    int nids[3] = { vnIdx[0], vnIdx[k], vnIdx[k+1] };
+                    for (int m = 0; m < 3; ++m) {
+                        int vi = idxs[m];
+                        if (vi < 0) vi = static_cast<int>(positions.size()) + 1 + vi;
+                        int vni = nids[m];
+                        std::array<float,3> pos = {0,0,0};
+                        std::array<float,3> col = {1,1,1};
+                        std::array<float,3> norm = {0,0,0};
+
+                        if (vi > 0 && static_cast<size_t>(vi) <= positions.size()) pos = positions[vi-1];
+                        if (vi > 0 && static_cast<size_t>(vi) <= colors.size()) col = colors[vi-1];
+                        if (vni > 0 && static_cast<size_t>(vni) <= normals.size()) norm = normals[vni-1];
+
+                        outVerts.push_back(pos[0]);
+                        outVerts.push_back(pos[1]);
+                        outVerts.push_back(pos[2]);
+                        outVerts.push_back(col[0]);
+                        outVerts.push_back(col[1]);
+                        outVerts.push_back(col[2]);
+                        outVerts.push_back(norm[0]);
+                        outVerts.push_back(norm[1]);
+                        outVerts.push_back(norm[2]);
+                    }
+                }
+            }
+        }
+    }
+
+    return !outVerts.empty();
 }
 
 nanogui::Window* g_infoWindow = nullptr;
@@ -99,7 +280,7 @@ nanogui::IntBox<int>* depthBox = nullptr;
 nanogui::Button* generateButton = nullptr;
 
 int main()
-{   
+{
     glfwInit();
     puts(glfwGetVersionString());
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -268,7 +449,7 @@ int main()
 
     // window for type 1 specific params
     nanogui::ref<nanogui::Window> type1Window = new nanogui::Window(&screen, "Split Koch Parameters");
-    type1Window->setPosition(Eigen::Vector2i(10, 615));
+    type1Window->setPosition(Eigen::Vector2i(10, 700));
     type1Window->setLayout(new nanogui::GroupLayout());
     type1Window->setSize(Eigen::Vector2i(270, 1000));
 
@@ -288,7 +469,7 @@ int main()
 
     // window for type 9 specific parameters
     nanogui::ref<nanogui::Window> type9Window = new nanogui::Window(&screen, "L-Sponge Parameters");
-    type9Window->setPosition(Eigen::Vector2i(10, 6150));
+    type9Window->setPosition(Eigen::Vector2i(10, 7000));
     type9Window->setLayout(new nanogui::GroupLayout());
     type9Window->setSize(Eigen::Vector2i(270, 1000));
     type9Window->setVisible(false);
@@ -304,7 +485,7 @@ int main()
     // modular 3x3 cube params
 
     nanogui::ref<nanogui::Window> type10Window = new nanogui::Window(&screen, "B.Y.O. 2x2 Cube Controls: Include");
-    type10Window->setPosition(Eigen::Vector2i(10, 615));
+    type10Window->setPosition(Eigen::Vector2i(10, 700));
     type10Window->setLayout(new nanogui::GroupLayout());
     type10Window->setSize(Eigen::Vector2i(200, 1000));
     type10Window->setVisible(false);
@@ -523,9 +704,9 @@ int main()
                 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
                 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
             camera.flat = true;
-        } else if (camera.flat=true) {
-        generateButton->setVisible(true); 
-        vertices.clear();
+        } else if (camera.flat == true) {
+            generateButton->setVisible(true); 
+            vertices.clear();
         }
         params->setVisible(type != 7);
         type1Window->setVisible(type == 0);
@@ -559,25 +740,48 @@ int main()
 
     nanogui::Widget *generateButtonContainer = new nanogui::Widget(mainWindow);
     generateButtonContainer->setLayout(new nanogui::BoxLayout(
-        nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 0));
+        nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 10));
 
     new nanogui::Widget(generateButtonContainer);
 
     generateButton = new nanogui::Button(generateButtonContainer, "Generate");
     generateButton->setFixedWidth(240);
 
-    nanogui::Button *testDialogButton = new nanogui::Button(generateButtonContainer, "Test Dialog");
-    testDialogButton->setFixedWidth(110);
-    testDialogButton->setCallback([&]() {
-        nfdchar_t *outPath = NULL;
-        nfdresult_t result = NFD_OpenDialog("txt", NULL, &outPath);
-        if (result == NFD_OKAY) {
-            std::cout << "Selected file: " << outPath << std::endl;
-            free(outPath);
-        } else if (result == NFD_CANCEL) {
-            std::cout << "Dialog cancelled" << std::endl;
+    nanogui::Button *saveDialogButton = new nanogui::Button(generateButtonContainer, "Save");
+    saveDialogButton->setFixedWidth(240);
+    saveDialogButton->setCallback([&vertices, &type]() {
+        const char *filters[1] = { "*.obj" };
+        const char *out = tinyfd_saveFileDialog("Save OBJ", "fractal.obj", 1, filters, NULL);
+        if (!out) return;
+        std::string path(out);
+        if (!saveVerticesOBJ(path, vertices, type)) {
+            std::cerr << "Failed to save OBJ\n";
         } else {
-            std::cerr << "NFD error opening dialog" << std::endl;
+            std::cout << "Saved OBJ: " << path << "\n";
+        }
+    });
+
+    nanogui::Button *loadDialogButton = new nanogui::Button(generateButtonContainer, "Load");
+    loadDialogButton->setFixedWidth(240);
+    loadDialogButton->setCallback([&vertices, &combo, &type]() {
+        const char *filters[1] = { "*.obj" };
+        const char *in = tinyfd_openFileDialog("Open OBJ", NULL, 1, filters, NULL, 0);
+        if (!in) return;
+        std::string path(in);
+        std::vector<float> tmp;
+        int loadedType = -1;
+        if (!loadOBJtoVertices(path, tmp, &loadedType)) {
+            std::cerr << "Failed to load OBJ\n";
+            return;
+        }
+        std::lock_guard<std::mutex> lk(verticesMutex);
+        vertices = std::move(tmp);
+        std::cout << "Loaded OBJ: " << path << " (" << vertices.size()/9 << " verts)\n";
+        if (loadedType >= 0) {
+            combo->setSelectedIndex(loadedType);
+            if (combo->callback())
+                combo->callback()(loadedType);
+            type = loadedType;
         }
     });
     
@@ -597,6 +801,8 @@ int main()
         setMaxDepth(depthBox->value());
         generateDone = false;
         // generateButton->setEnabled(false);
+        saveDialogButton->setEnabled(false);
+        loadDialogButton->setEnabled(false);
         generateButton->setCaption("Bail");
         combo->setEnabled(false);
         vertices.clear();
@@ -717,6 +923,8 @@ int main()
         }
 
         // generateButton->setEnabled(true);
+        saveDialogButton->setEnabled(true);
+        loadDialogButton->setEnabled(true);
         combo->setEnabled(true);
         generateButton->setCaption("Generate");
         generateDone = true; }); });

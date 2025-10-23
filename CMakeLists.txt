@@ -18,10 +18,11 @@ add_executable(fractal_viewer src/main.cpp src/glad.c)
 target_link_libraries(fractal_viewer PRIVATE nanogui /usr/local/lib/libglfw.so)
 target_include_directories(fractal_viewer PRIVATE nanogui/include PRIVATE ${CMAKE_SOURCE_DIR}/third_party/nativefiledialog/include)
 
-target_sources(fractal_viewer PRIVATE
-    ${CMAKE_SOURCE_DIR}/third_party/nativefiledialog/nfd_common.c
-    ${CMAKE_SOURCE_DIR}/third_party/nativefiledialog/nfd_zenity.c
-)
+set(TINYFD_DIR ${CMAKE_SOURCE_DIR}/third_party/tinyfiledialogs)
+if (EXISTS "${TINYFD_DIR}/tinyfiledialogs.c")
+    target_include_directories(fractal_viewer PRIVATE ${TINYFD_DIR})
+    target_sources(fractal_viewer PRIVATE ${TINYFD_DIR}/tinyfiledialogs.c)
+endif()
 if(UNIX)
     target_link_libraries(fractal_viewer PRIVATE dl)
 endif()
