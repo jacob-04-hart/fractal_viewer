@@ -1029,15 +1029,6 @@ int main()
 //------------------------------------------------------------------renderloop--------------------------------------------------------
     while (!glfwWindowShouldClose(window))
     {
-        if (type != 7 ){
-            verticesMutex.lock();
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-            verticesMutex.unlock();
-        }else{
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-        }
         if (generateDone && generateThread.joinable())
         {
             generateThread.join();
@@ -1061,6 +1052,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         if(type==7) {
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
             mandelShader.use();
             mandelShader.setInt("maxItr",200);
             //for possible user choice coloring
@@ -1080,6 +1073,10 @@ int main()
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
         } else {
+            verticesMutex.lock();
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+            verticesMutex.unlock();
             ourShader.use();
             ourShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
             ourShader.setVec3("lightPos", lightPos);
