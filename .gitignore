@@ -11,6 +11,7 @@
 /*.so
 /*.dll
 /*.sh
+/src/saves/*.obj
 
 # Ignore all build directories
 build*/
