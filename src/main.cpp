@@ -340,8 +340,8 @@ int main()
 //----------------------------------------------------------------------userinterface----------------------------------------------------------------------
     int type = 0;
     int renderedType = 0;
-    std::vector<std::string> typeOptions = {"Split Koch", "Checkered Koch", "Pointy Koch", "3D Sierpinski", "3D Inverse Sierpinski", 
-                                            "Koch Tetrahedron", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: 2x2 Cube",
+    std::vector<std::string> typeOptions = {"Split Koch", "Koch Tetrahedron", "Checkered Koch", "Pointy Koch", "3D Sierpinski",  
+                                            "3D Inverse Sierpinski", "Menger Sponge", "Mandelbrot", "L-Sponge", "Build Your Own: 2x2 Cube",
                                             "Build Your Own: 3x3 Cube", "Build Your Own: 4x4 Cube", "Build Your Own: 5x5 Cube",
                                             "Jerusalem Cube", "Octahedron"};
 
@@ -825,35 +825,35 @@ int main()
             d4Bottom.at(2) = thicknessBox->value()/2;
             drawK2D4(eqTVertex1,eqTVertex2,eqTVertex3,d4Top,d4Bottom,0,vertices,color1,color2,color3,color1,color2,color3);
             camera.flat = false;
-        } else if (type==1){
+        }else if (type==1){ // add option to not do some sides
+            drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
+            drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
+            drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
+            drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
+            camera.flat = false;
+        }else if (type==2){
             drawKT2(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT2(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT2(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT2(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             camera.flat = false;
-        } else if (type==2){
+        }else if (type==3){
             drawKT3(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawKT3(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawKT3(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawKT3(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             camera.flat = false;
-        }else if (type==3){
+        }else if (type==4){
             drawST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             camera.flat = false;
-        }else if (type==4){
+        }else if (type==5){
             drawInverseST(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
             drawInverseST(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
             drawInverseST(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
             drawInverseST(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
-            camera.flat = false;
-        }else if (type==5){ // add option to not do some sides
-            drawKT(f1vertex1, f1vertex2, f1vertex3, 0, vertices);
-            drawKT(f2vertex1, f2vertex2, f2vertex3, 0, vertices);
-            drawKT(f3vertex1, f3vertex2, f3vertex3, 0, vertices);
-            drawKT(f4vertex1, f4vertex2, f4vertex3, 0, vertices);
             camera.flat = false;
         }else if (type==6){
             drawSponge(cubeVert1,1,0,vertices);
@@ -1124,7 +1124,7 @@ int main()
                 glBindVertexArray(VAO);
                 glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
             }
-            if (renderedType == 1)
+            if (renderedType == 2)
             {
                 glm::mat4 rotatedModel = glm::mat4(1.0f);
                 if (isFirstDown)
